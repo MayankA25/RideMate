@@ -1,0 +1,181 @@
+import { create } from "zustand";
+import { useAuthStore } from "./useAuthStore";
+import { axiosInstance } from "../lib/axios";
+import { useSuggestionStore } from "./useSuggestionStore";
+import toast from "react-hot-toast";
+
+export const useRideStore = create((set, get) => ({
+  rides: [],
+
+  driverRides: [],
+
+  edit: false,
+
+  setEdit: async(val)=>{
+    set({ edit: val });
+  },
+
+  selectedRide: null,
+
+  bookedRides: [],
+  
+
+  getAllRides: async()=>{
+    const { searchDetails } = useSuggestionStore.getState();
+    try{
+      const response = await axiosInstance.get("/rides/getrides", {
+        params: {
+          pickup: JSON.stringify(searchDetails.pickup),
+          destination: JSON.stringify(searchDetails.destination),
+          departureDate: searchDetails.departureDate
+        }
+      });
+      console.log("Rides: ", response.data);
+
+      set({ rides: response.data.rides[0] ? response.data.rides : [] });
+    }catch(e){
+      console.log(e);
+      return toast.error("Error While Getting Available Rides")
+    }
+
+  },
+
+  addRide: async () => {
+    const { user } = useAuthStore.getState();
+    const { rideDetails } = useSuggestionStore.getState();
+    // const { rideDetails } = get();
+    try {
+      const response = await axiosInstance.post("/rides/addride", {
+        driverId: user._id,
+        pickup: rideDetails.pickup,
+        destination: rideDetails.destination,
+        departureDate: rideDetails.departureDate,
+        carName: rideDetails.carName,
+        carColor: rideDetails.carColor,
+        fare: rideDetails.fare,
+        availableSeats: rideDetails.availableSeats,
+      });
+      console.log("Response: ", response.data);
+      set({ driverRides: [...get().driverRides, response.data.newRide]  })
+    } catch (e) {
+      console.log(e);
+      throw new Error("Error While Adding Ride")
+    }
+  },
+
+  getDriverRides: async()=>{
+    const { user } = useAuthStore.getState();
+    try{
+        const response = await axiosInstance.get("/rides/getdriverrides", {
+            params: {
+                driverId: user._id
+            }
+        });
+        console.log("Driver Rides: ", response.data);
+        set({ driverRides: response.data.rides });
+    }catch(e){
+        console.log(e);
+    }
+  },
+
+  updateRide: async(rideId)=>{
+    const { rideDetails } = useSuggestionStore.getState();
+    try{
+      const response = await axiosInstance.put("/rides/updateride", {
+        rideId: rideId,
+        pickup: rideDetails.pickup,
+        destination: rideDetails.destination,
+        departureDate: rideDetails.departureDate,
+        fare: rideDetails.fare,
+        carName: rideDetails.carName,
+        carColor: rideDetails.carColor,
+        availableSeats: rideDetails.availableSeats
+      });
+
+      console.log("Response: ", response.data);
+
+    }catch(e){
+      console.log(e);
+      throw new Error("Error While Updating Ride")
+    }
+  },
+
+  deleteRide: async(rideId)=>{
+    try{
+      const tempRides = [...get().driverRides];
+      const foundIndex = tempRides.findIndex((ride, index)=>ride._id == rideId);
+      tempRides.splice(foundIndex, 1);
+      set({ driverRides: tempRides });
+      const response = await axiosInstance.delete("/rides/deleteride", {
+        params:{
+          rideId: rideId
+        }
+      });
+      console.log("Response: ", response.data);
+
+    }catch(e){
+      console.log(e);
+    }
+  },
+
+
+  getRideInfo: async(rideId)=>{
+    try{
+      const response = await axiosInstance.get("/rides/getrideinfo", {
+        params: {
+          rideId: rideId
+        }
+      });
+
+      console.log("Response: ", response.data);
+      set({ selectedRide: response.data.ride })
+    }catch(e){
+      console.log(e);
+      toast.error("Error While Getting Ride Information")
+    }
+  },
+
+  joinRide: async(rideId, userId)=>{
+    try{
+      const response = await axiosInstance.post("/rides/joinride", {
+        rideId: rideId,
+        userId: userId
+      });
+
+      console.log("Response: ", response.data);
+
+    }catch(e){
+      console.log(e);
+      toast.error("Error While Joining Ride")
+    }
+  },
+
+  checkIfUserIsPassenger: ()=>{
+    const { selectedRide } = get();
+    const { user } = useAuthStore.getState();
+
+    const passengers = selectedRide?.passengers;
+
+    console.log("Passengers: ", passengers)
+
+    const foundIndex = passengers?.findIndex((passenger, index)=>{
+      return passenger._id == user._id
+    });
+
+    console.log("Found Index: ", foundIndex)
+
+    return foundIndex != -1;
+  },
+
+  getBookedRides: async()=>{
+    try{
+      const response = await axiosInstance.get("/rides/getbookedrides");
+      console.log("Response: ", response.data);
+
+      set({ bookedRides: response.data.rides })
+    }catch(e){
+      console.log(e)
+    }
+  }
+
+}));

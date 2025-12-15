@@ -1,0 +1,46 @@
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
+import LandingPage from "./pages/LandingPage/LandingPage";
+import Navbar from "./components/Navbar/Navbar";
+import { useEffect } from "react";
+import { useAuthStore } from "./store/useAuthStore";
+import { Toaster } from "react-hot-toast";
+import Map from "./components/Map/Map";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Dashboard from "./pages/Dashboard/Dashboard";
+// import Account from "./components/Accounts12/Account";
+import Account from "./components/Account/Account";
+import Form from "./components/Form/Form";
+import { useFormStore } from "./store/useFormStore";
+import RideInfo from "./components/RideInfo/RideInfo";
+import Wrapper from "./pages/Wrapper/Wrapper";
+
+function App() {
+  const { getUser, authenticated, user } = useAuthStore();
+  const { initialFormSubmitted } = useFormStore();
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  return (
+    <div className="relative w-[100vw] h-[100vh] overflow-x-hidden">
+
+      <Routes>
+        <Route exact path="/" element={<LandingPage />}></Route>
+        <Route exact path="/dashboard/*" element={authenticated && user?.initialFormSubmitted ? <Dashboard /> : <Navigate to={"/form"}/>}></Route>
+        {/* <Route exact path="/account" element={authenticated ? <Account/> : <Navigate to={"/"}/>}></Route> */}
+        <Route exact path="/form" element={authenticated ? (user?.initialFormSubmitted ? <Navigate to={"/dashboard"}/> : <Form/>) : <Navigate to={"/"}/>} ></Route>
+        <Route exact path="/account/:id" element={<Account/>}></Route>
+        <Route exact path="/info/*" element={<Wrapper/>}/>
+        {/* <Map/> */}
+        <Route exact path="/map" element={<Map/>} />
+      </Routes>
+      <Toaster />
+    </div>
+  );
+}
+
+export default App;
