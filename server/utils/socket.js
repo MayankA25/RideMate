@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
+import { Ride } from "../models/Rides.js";
 
 const app = express();
 
@@ -28,8 +29,10 @@ io.on("connection", (socket)=>{
     console.log("Am User Connected: ", socket.id);
     const userId = socket.handshake.query.userId;
 
+    
     if(userId){
         userSocketMap[userId] = socket.id
+        socket.userId = userId;
     };
 
     console.log("User Socket Map: ", userSocketMap);
@@ -39,8 +42,34 @@ io.on("connection", (socket)=>{
         console.log("An User Disconnected: ", socket.id)
     });
 
-    socket.on("join-room", ()=>{
-        
+    socket.on("join-room", async ({ rideId })=>{
+
+        console.log("Joining Room....");
+
+        // Authorization
+
+        const foundRide = await Ride.findOne({
+            _id: rideId,
+            $or: [
+                { driver: socket.userId },
+                { passengers: socket.userId }
+            ]
+        });
+
+        if(!foundRide){
+            console.log("Ride Not Found");
+            return;
+        }
+
+        socket.join(rideId);
+
+        console.log(`${socket.userId} joined room for ride id: ${rideId}`);
+    });
+
+    socket.on("leave-room", async({ rideId })=>{
+        console.log("Leaving Room...");
+        socket.leave(rideId);
+        console.log(`${ socket.userId } left the room for ride id: ${ rideId }`)
     })
 })
 

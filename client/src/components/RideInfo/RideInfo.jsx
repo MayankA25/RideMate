@@ -277,7 +277,7 @@ export default function RideInfo() {
             <h1 className="font-bold cursor-pointer">Report Ride</h1>
           </div>
         </div>
-        <div className="flex items-center justify-center fixed bottom-0 w-full left-0">
+        {user._id != selectedRide?.driver._id && <div className="flex items-center justify-center fixed bottom-0 w-full left-0">
           <button
             disabled={!authenticated || checkIfUserIsPassenger()}
             className="btn btn-primary w-full py-8 text-xl"
@@ -287,7 +287,7 @@ export default function RideInfo() {
           >
             {checkIfUserIsPassenger() ? "Booked" : "Book Now"}
           </button>
-        </div>
+        </div>}
       </div>
     </div>
   );

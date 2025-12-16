@@ -112,7 +112,7 @@ export default function YourRides() {
                           <h1 className="font-bold text-lg">
                             {ride.driver.firstName}
                           </h1>
-                          <BadgeCheck
+                          {(ride.driver.drivingLicenseStatus == 'verified' || ride.driver.aadharCardStatus == 'verified') && <BadgeCheck
                             className={`${
                               ((ride.driver.aadharCardStatus == "verified" &&
                                 ride.driver.drivingLicenseStatus !=
@@ -126,7 +126,7 @@ export default function YourRides() {
                               ride.driver.drivingLicenseStatus == "verified" &&
                               "text-green-300"
                             }`}
-                          />
+                          />}
                         </div>
                       </div>
                       <div className="flex items-center justify-center">
