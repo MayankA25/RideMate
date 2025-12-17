@@ -20,7 +20,7 @@ export const useRideStore = create((set, get) => ({
   bookedRides: [],
   
 
-  getAllRides: async(departureDate)=>{
+  getAllRides: async()=>{
     const { searchDetails } = useSuggestionStore.getState()
     try{
       const response = await axiosInstance.get("/rides/getrides", {
@@ -34,21 +34,19 @@ export const useRideStore = create((set, get) => ({
 
       const rides = [...response.data.rides];
 
-      const filteredRides = rides.filter((ride, index)=>{
-        const year = new Date(ride.departureDate).getFullYear();
-        const month = `${new Date(ride.departureDate).getMonth() + 1}`.padStart(2, "0");
-        const date = `${new Date(ride.departureDate).getDate()}`.padStart(2, "0");
+      // const filteredRides = rides.filter((ride, index)=>{
+      //   const year = new Date(ride.departureDate).getFullYear();
+      //   const month = `${new Date(ride.departureDate).getMonth() + 1}`.padStart(2, "0");
+      //   const date = `${new Date(ride.departureDate).getDate()}`.padStart(2, "0");
 
-        const newRideDepartureDate = `${year}-${month}-${date}`;
-        console.log("Ride Departure Date: ", newRideDepartureDate);
-        console.log("User Departure Date: ", departureDate)
+      //   const newRideDepartureDate = `${year}-${month}-${date}`;
+      //   console.log("Ride Departure Date: ", newRideDepartureDate);
+      //   console.log("User Departure Date: ", departureDate)
 
-        return newRideDepartureDate == departureDate;
-      });
+      //   return newRideDepartureDate == departureDate;
+      // });
 
-      console.log("Filtered Rides: ", filteredRides);
-
-      set({ rides: response.data.rides[0] ? filteredRides : [] });
+      set({ rides: response.data.rides[0] ? rides : [] });
     }catch(e){
       console.log(e);
       return toast.error("Error While Getting Available Rides")

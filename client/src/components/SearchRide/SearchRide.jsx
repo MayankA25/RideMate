@@ -18,6 +18,7 @@ export default function SearchRide() {
 
   const [arrivalChanging, setArrivalChanging] = useState(false);
   const [destinationChanging, setDestinationChanging] = useState(false);
+  const [timezone, setTimezone] = useState('');
 
   const { getAllRides } = useRideStore();
 
@@ -220,7 +221,7 @@ export default function SearchRide() {
           <button
             className="btn btn-primary w-full"
             onClick={() => {
-              getAllRides(searchDetails.departureDate);
+              getAllRides();
               navigate("/dashboard/rides");
               setInfoFilled(true);
             }}

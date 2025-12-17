@@ -1,6 +1,6 @@
 import { Ride } from "../models/Rides.js";
 import { getEstimatedTimeOfArrival } from "../utils/routing.js";
-import { Group } from "../models/Group.js";
+import { Group } from "../models/Group.js"; 
 
 export const getAllRides = async (req, res) => {
   const { pickup, destination, departureDate } = req.query;
@@ -10,34 +10,45 @@ export const getAllRides = async (req, res) => {
   console.log("Destination: ", destinationJson);
   console.log("Departure Date: ", departureDate);
   try {
+
+    console.log("User Departure Date: ", new Date(departureDate));
+
+    // const utcNewDate = new Date(departureDate).getTime() + (timezoneOffsetInMinutes * 60 * 1000);
+
+    // console.log("UTC New Date: ", utcNewDate);
+
+    // const startDate = new Date(utcNewDate).getTime();
+    // const ONE_DAY = 24 * 60 * 60 * 1000;
+    // const endDate = new Date(utcNewDate).getTime() + ONE_DAY;
+
+    const splittedDate = departureDate.split("-");
+
+    const year = Number.parseInt(splittedDate[0]);
+    const month = Number.parseInt(splittedDate[1])-1;
+    const date = Number.parseInt(splittedDate[2]);
+
+
+    console.log("Year: ", year, "Month: ", month, "Date: ", date);
+
+    const startDate = new Date(year, month, date, 0, 0, 0, 0);
+    const endDate = new Date(year, month, date, 24, 0, 0, 0);
+
+
+    console.log("Start Date: ", startDate)
+    console.log("End Date: ", endDate)
+
     const rides = await Ride.find({
       "pickup.place_id": pickupJson.place_id,
       "destination.place_id": destinationJson.place_id,
+      departureDate: {
+        $gte: new Date(startDate),
+        $lt: new Date(endDate)
+      }
     })
       .populate("driver")
       .populate("passengers")
       .populate("group");
     console.log("Rides: ", rides);
-
-    
-    // const filteredRides = rides.filter((ride, index)=>{
-    //   console.log("User Departure Date: ", new Date(departureDate).toISOString());
-    //   console.log("User Departure Date: ", new Date(departureDate).getTime());
-    //   const year = new Date(ride.departureDate).getFullYear();
-    //   const month = `${new Date(ride.departureDate).getMonth()+1}`.padStart(2, "0");
-    //   const date = `${new Date(ride.departureDate).getDate()}`.padStart(2, "0");
-    //   const userDepatureDate = new Date(departureDate).getTime();
-    //   const rideDepartureDate = new Date(`${year}-${month}-${date}`).getTime();
-    //   console.log("Ride Departure Date: ", rideDepartureDate)
-    //   const ONE_DAY = 24 * 60 * 60 * 1000;
-
-    //   console.log("Condn 1: ", userDepatureDate >= rideDepartureDate);
-    //   console.log("Condn 2: ", userDepatureDate < (rideDepartureDate + ONE_DAY))
-
-    //   return (userDepatureDate >= rideDepartureDate) && (userDepatureDate < (rideDepartureDate + ONE_DAY))
-    // });
-
-    // console.log("Filtered Rides: ", filteredRides);
 
     return res
       .status(200)
