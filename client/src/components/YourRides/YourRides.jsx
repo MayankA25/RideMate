@@ -1,10 +1,11 @@
-import { ArrowLeft, BadgeCheck, ChevronRight, Circle, Pen, PenBox, Plus, User, X } from "lucide-react";
+import { ArrowLeft, BadgeCheck, ChevronRight, Circle, MessageCircle, Pen, PenBox, Plus, User, X } from "lucide-react";
 import React, { useEffect } from "react";
 import AddRideModal from "../AddRideModal/AddRideModal";
 import { useRideStore } from "../../store/userRideStore";
 import { useNavigate } from "react-router-dom";
 import { useSuggestionStore } from "../../store/useSuggestionStore";
 import { getFormattedDate } from "../../../utils/date";
+import useChatStore from "../../store/useChatStore";
 
 export default function YourRides() {
   const { getDriverRides, driverRides, setEdit, deleteRide } = useRideStore();
@@ -14,6 +15,7 @@ export default function YourRides() {
   }, []);
   const navigate = useNavigate();
   const { suggestPlace } = useSuggestionStore();
+  const { getSelectedGroup } = useChatStore();
   return (
     <div className="w-[78%] h-full m-auto">
       <div className="flex flex-col justify-center gap-5 py-10">
@@ -89,6 +91,10 @@ export default function YourRides() {
                       <h1 className="font-bold text-lg">₹{ride.fare}</h1>
                     </div>
                     <div className="flex flex-col justify-center gap-3 p-3">
+                      <button className="btn btn-primary font-bold"  onClick={()=>{
+                        navigate(`/dashboard/chat/${ride._id}`);
+                        getSelectedGroup(ride.group._id)
+                      }}><MessageCircle className="size-5"/>Go To Chat</button>
                       <button className="btn btn-primary font-bold"><User className="size-5"/> Show Passengers</button>
                       <button className="btn btn-primary font-bold" onMouseOver={()=>{setEdit(true); setRideDetails({ pickup: ride.pickup, destination: ride.destination, departureDate: getFormattedDate(ride.departureDate), carName: ride.carName, carColor: ride.carColor, fare: ride.fare, availableSeats: ride.availableSeats })}} onClick={()=>{document.getElementById(`my_add_ride_modal_${index}`).showModal()}}><PenBox className="size-5"/> Edit Ride</button>
                       <button className="btn btn-error text-white font-bold" onClick={()=>{ deleteRide(ride._id) }}><X/> Delete</button>

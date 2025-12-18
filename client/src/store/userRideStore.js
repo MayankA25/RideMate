@@ -71,7 +71,7 @@ export const useRideStore = create((set, get) => ({
       });
       console.log("Response: ", response.data);
       set({ driverRides: [...get().driverRides, response.data.newRide]  });
-      socket.emit('join-room', { rideId: response.data.newRide._id });
+      // socket.emit('join-room', { rideId: response.data.newRide._id });
     } catch (e) {
       console.log(e);
       throw new Error("Error While Adding Ride")

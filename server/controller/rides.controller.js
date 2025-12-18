@@ -43,7 +43,8 @@ export const getAllRides = async (req, res) => {
       departureDate: {
         $gte: new Date(startDate),
         $lt: new Date(endDate)
-      }
+      },
+      driver: { $ne: req.session.passport.user.user._id }
     })
       .populate("driver")
       .populate("passengers")
@@ -62,7 +63,7 @@ export const getAllRides = async (req, res) => {
 export const getDriverRides = async (req, res) => {
   const { driverId } = req.query;
   try {
-    const foundRides = await Ride.find({ driver: driverId }).populate("driver");
+    const foundRides = await Ride.find({ driver: driverId }).populate("driver").populate('passengers').populate('group');
     console.log("Driver Rides: ", foundRides);
 
     return res.status(200).json({ rides: foundRides });

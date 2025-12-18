@@ -12,6 +12,8 @@ import requestRouter from "../routes/request.route.js";
 import passport from "passport";
 import rideRouter from "../routes/rides.route.js";
 import suggestionRouter from "../routes/suggestion.route.js";
+import chatRouter from "../routes/chat.route.js";
+import groupRouter from "../routes/group.route.js";
 
 dotenv.config({ path: "D:\\Mayank Data\\CODING\\RideMate\\server\\.env" })
 
@@ -56,7 +58,9 @@ app.use("/api/auth", authRouter);
 app.use("/api/files", fileRouter);
 app.use("/api/requests", requestRouter);
 app.use("/api/rides", rideRouter);
-app.use("/api/suggestions", suggestionRouter)
+app.use("/api/suggestions", suggestionRouter);
+app.use("/api/group", groupRouter);
+app.use("/api/chat", chatRouter);
 
 const PORT = process.env.PORT;
 server.listen(PORT, ()=>{

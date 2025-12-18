@@ -49,7 +49,7 @@ export default function Sidebar() {
   return (
     <div
       className={`flex ${
-        toggle ? "w-[18%]" : "w-[5%]"
+        toggle ? "w-[40%] lg:w-[18%]" : "w-[10%] lg:w-[5%]"
       } min-h-full rounded-r-xl transition-all duration-200 fixed top-0 z-100`}
     >
       <div className="w-full h-[100vh] bg-base-300 rounded-r-xl">

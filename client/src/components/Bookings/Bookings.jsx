@@ -2,10 +2,12 @@ import React, { useEffect } from 'react'
 import { useRideStore } from '../../store/userRideStore'
 import { ArrowLeft, BadgeCheck, ChevronRight, MessageCircle, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import useChatStore from '../../store/useChatStore';
 
 export default function Bookings() {
 
   const { getBookedRides, bookedRides } = useRideStore();
+  const { getSelectedGroup } = useChatStore()
 
   useEffect(()=>{
     getBookedRides();
@@ -72,7 +74,8 @@ export default function Bookings() {
                     </div>
                     <div className="flex flex-col justify-center gap-3 p-3">
                       <button className="btn btn-primary font-bold flex gap-2" onClick={()=>{
-                        
+                        navigate(`/dashboard/chat/${ride._id}`);
+                        getSelectedGroup(ride.group._id)
                       }}><MessageCircle className="size-5"/><span>Go To Chat</span></button>
                     </div>
                   </div>

@@ -11,6 +11,7 @@ import RideInfo from '../../components/RideInfo/RideInfo'
 import { useState } from 'react'
 import SearchRide from '../../components/SearchRide/SearchRide'
 import { useSuggestionStore } from '../../store/useSuggestionStore'
+import Chat from '../Chat/Chat'
 
 export default function Dashboard() {
   // const [ infoFilled, setInfoFilled ] = useState(false);
@@ -31,6 +32,7 @@ export default function Dashboard() {
         <Route path='bookings' element={<Bookings/>}/>
         <Route path='users' element={<User/>} />
         <Route path='requests' element={<Documents/>} />
+        <Route path='chat/:id' element={<Chat/>}/>
     </Routes>
     </div>
   )
