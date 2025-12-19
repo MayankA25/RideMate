@@ -3,6 +3,7 @@ import { useAuthStore } from "./useAuthStore";
 import { axiosInstance } from "../lib/axios";
 import { useSuggestionStore } from "./useSuggestionStore";
 import toast from "react-hot-toast";
+import { useMapStore } from "./useMapStore";
 
 export const useRideStore = create((set, get) => ({
   rides: [],
@@ -136,6 +137,7 @@ export const useRideStore = create((set, get) => ({
 
 
   getRideInfo: async(rideId)=>{
+    const { setStartCoords, setEndCoords } = useMapStore.getState();
     try{
       const response = await axiosInstance.get("/rides/getrideinfo", {
         params: {

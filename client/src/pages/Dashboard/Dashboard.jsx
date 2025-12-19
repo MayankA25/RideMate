@@ -12,6 +12,7 @@ import { useState } from 'react'
 import SearchRide from '../../components/SearchRide/SearchRide'
 import { useSuggestionStore } from '../../store/useSuggestionStore'
 import Chat from '../Chat/Chat'
+import Map from '../../components/Map/Map'
 
 export default function Dashboard() {
   // const [ infoFilled, setInfoFilled ] = useState(false);
@@ -33,6 +34,7 @@ export default function Dashboard() {
         <Route path='users' element={<User/>} />
         <Route path='requests' element={<Documents/>} />
         <Route path='chat/:id' element={<Chat/>}/>
+        {/* <Route path='map' element={<Map/>} /> */}
     </Routes>
     </div>
   )

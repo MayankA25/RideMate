@@ -7,12 +7,14 @@ import {
   BadgeCheck,
   ChevronRight,
   Circle,
+  Map,
   TriangleAlert,
   Upload,
 } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import RideBookingConfirmation from "../RideBookingConfirmation/RideBookingConfirmation";
 import toast from "react-hot-toast";
+import { useMapStore } from "../../store/useMapStore";
 
 export default function RideInfo() {
   const params = useParams();
@@ -28,6 +30,8 @@ export default function RideInfo() {
   }, []);
 
   const { authenticated } = useAuthStore();
+
+  const { setStartCoords, setEndCoords } = useMapStore()
 
   const getDifferenceTime = () => {
     const departure = new Date(selectedRide?.departureDate).getTime();
@@ -97,6 +101,11 @@ export default function RideInfo() {
                       .join("")}
                   </span>
                 </div>
+                <Map className="size-5 cursor-pointer text-indigo-400" onClick={()=>{
+                  setStartCoords(selectedRide?.pickup.coordinates.reverse());
+                  setEndCoords(selectedRide?.destination.coordinates.reverse());
+                  navigate(`/map/${selectedRide?._id}`)
+                }}/>
               </div>
               <div className="flex items-center gap-3">
                 <Circle className="size-5 bg-white rounded-full" />
@@ -119,6 +128,11 @@ export default function RideInfo() {
                       })}
                   </span>
                 </div>
+                <Map className="size-5 cursor-pointer text-indigo-400" onClick={()=>{
+                  setStartCoords(selectedRide?.destination.coordinates.reverse())
+                  setEndCoords(selectedRide?.pickup.coordinates.reverse());
+                  navigate(`/map/${selectedRide?._id}`)
+                }}/>
               </div>
             </div>
           </div>
@@ -277,7 +291,7 @@ export default function RideInfo() {
             <h1 className="font-bold cursor-pointer">Report Ride</h1>
           </div>
         </div>
-        {user._id != selectedRide?.driver._id && <div className="flex items-center justify-center fixed bottom-0 w-full left-0">
+        {user?._id != selectedRide?.driver?._id && <div className="flex items-center justify-center fixed bottom-0 w-full left-0">
           <button
             disabled={!authenticated || checkIfUserIsPassenger()}
             className="btn btn-primary w-full py-8 text-xl"

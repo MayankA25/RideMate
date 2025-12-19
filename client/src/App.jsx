@@ -36,7 +36,7 @@ function App() {
         <Route exact path="/account/:id" element={<Account/>}></Route>
         <Route exact path="/info/*" element={<Wrapper/>}/>
         {/* <Map/> */}
-        <Route exact path="/map" element={<Map/>} />
+        <Route exact path="/map/:id" element={<Map/>} />
       </Routes>
       <Toaster />
     </div>
