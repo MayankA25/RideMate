@@ -10,7 +10,8 @@ export const useFormStore = create((set, get)=>({
         phone: "",
         country: "",
         state: "",
-        profilePic: ""
+        profilePic: "",
+        gender: ""
     },
 
     initialFormSubmitted: false,
@@ -29,7 +30,8 @@ export const useFormStore = create((set, get)=>({
                 phone: formDetails.phone,
                 country: formDetails.country,
                 state: formDetails.state,
-                profilePic: formDetails.profilePic || user.profilePic
+                profilePic: formDetails.profilePic || user.profilePic,
+                gender: formDetails.gender
             });
 
             console.log("Data: ", response.data);

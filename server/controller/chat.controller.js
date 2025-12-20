@@ -4,7 +4,7 @@ import { io } from "../utils/socket.js";
 export const getMessages = async(req, res)=>{
     const { groupId } = req.query;
     try{
-        const messages = await Message.find({group: groupId});
+        const messages = await Message.find({group: groupId}).populate('sender').populate('group').populate('parentId');
 
         console.log("Messages: ", messages);
 
@@ -16,7 +16,7 @@ export const getMessages = async(req, res)=>{
 }
 
 export const sendMessage = async(req, res)=>{
-    const { senderId, groupId, text } = req.body;
+    const { senderId, groupId, text, rideId } = req.body;
 
     try{
 
@@ -27,8 +27,10 @@ export const sendMessage = async(req, res)=>{
         });
 
         const savedMessage = await newMessage.save();
+
+        const newGroupMessage = await (await (await savedMessage.populate('sender')).populate('group')).populate('parentId')
         
-        io.to(rideId).emit('newGroupMessage', savedMessage);
+        io.to(rideId).emit('newGroupMessage', newGroupMessage);
 
         return res.status(200).json({ msg: "Message has been sent successfully", message: savedMessage });
 

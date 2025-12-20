@@ -31,7 +31,7 @@ export default function Bookings() {
           <div className="flex items-center justify-between">
             <h1 className='font-bold text-xl'>Booked Rides({bookedRides.length})</h1>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-5">
             {bookedRides.map((ride, index)=>{
               return (
                 <div

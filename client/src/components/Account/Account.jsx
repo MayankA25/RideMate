@@ -177,6 +177,8 @@ export default function Account() {
             <h1 className="font-bold text-lg">
               {user && params.id == user._id ? user?.state : specificUser?.state}, {user && params.id == user._id ? user?.country : specificUser?.country}
             </h1>
+            <h1 className="font-bold text-lg">Gender</h1>
+            <h1 className="font-bold text-lg">{ user && params.id == user._id ? user?.gender : specificUser?.gender }</h1>
           </div>
         </div>
         <hr className="text-white/30" />

@@ -50,7 +50,7 @@ export const getUser = async (req, res) => {
 };
 
 export const submitForm = async (req, res) => {
-  const { id, phone, country, state, profilePic } = req.body;
+  const { id, phone, country, state, profilePic, gender } = req.body;
   try {
     const validPhone = validatePhone(phone);
     if (!validPhone)
@@ -63,6 +63,7 @@ export const submitForm = async (req, res) => {
         state: state,
         profilePic: profilePic,
         initialFormSubmitted: true,
+        gender: gender
       },
       { new: true }
     );
@@ -73,6 +74,7 @@ export const submitForm = async (req, res) => {
       country: country,
       state: state,
       profilePic: profilePic,
+      gender: gender
     };
     console.log("Updated User: ", updatedUser);
 

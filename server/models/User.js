@@ -55,6 +55,10 @@ const userSchema = new Schema({
     },
     state: {
         type: String
+    },
+    gender: {
+        type: String,
+        enums: ["Male", "Female", "Other"]
     }
 });
 

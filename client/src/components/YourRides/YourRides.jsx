@@ -10,6 +10,7 @@ import useChatStore from "../../store/useChatStore";
 export default function YourRides() {
   const { getDriverRides, driverRides, setEdit, deleteRide } = useRideStore();
   const { setRideDetails, suggesting } = useSuggestionStore();
+  const { getMessages } = useChatStore();
   useEffect(() => {
     getDriverRides();
   }, []);
@@ -26,7 +27,7 @@ export default function YourRides() {
           <h1 className='font-bold text-xl'>Your Rides</h1>
         </div>
         <hr className="opacity-30" />
-        <div className="flex flex-col justify-center py-5 gap-8">
+        <div className="flex flex-col justify-center gap-8">
           {/* <div className="flex items-center justify-between gap-7">
             <input
               type="text"
@@ -35,7 +36,7 @@ export default function YourRides() {
             />
           </div> */}
           <div className="flex items-center justify-between">
-            <h1 className="font-bold text-2xl">Published Rides ({driverRides.length})</h1>
+            <h1 className="font-bold text-xl">Published Rides ({driverRides.length})</h1>
             <AddRideModal index={"number"}/>
             <button
               className="bg-indigo-900 px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 font-bold"
@@ -93,7 +94,7 @@ export default function YourRides() {
                     <div className="flex flex-col justify-center gap-3 p-3">
                       <button className="btn btn-primary font-bold"  onClick={()=>{
                         navigate(`/dashboard/chat/${ride._id}`);
-                        getSelectedGroup(ride.group._id)
+                        getSelectedGroup(ride.group._id);
                       }}><MessageCircle className="size-5"/>Go To Chat</button>
                       <button className="btn btn-primary font-bold"><User className="size-5"/> Show Passengers</button>
                       <button className="btn btn-primary font-bold" onMouseOver={()=>{setEdit(true); setRideDetails({ pickup: ride.pickup, destination: ride.destination, departureDate: getFormattedDate(ride.departureDate), carName: ride.carName, carColor: ride.carColor, fare: ride.fare, availableSeats: ride.availableSeats })}} onClick={()=>{document.getElementById(`my_add_ride_modal_${index}`).showModal()}}><PenBox className="size-5"/> Edit Ride</button>

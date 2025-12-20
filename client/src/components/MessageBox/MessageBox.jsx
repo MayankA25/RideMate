@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 
-export default function MessageBox({ text, number }) {
+export default function MessageBox({ message, number, sender }) {
   const [hover, setHover] = useState(false);
   
   return (
@@ -23,13 +23,13 @@ export default function MessageBox({ text, number }) {
         <div className="w-10 rounded-full">
           <img
             alt="Tailwind CSS chat bubble component"
-            src="https://img.daisyui.com/images/profile/demo/kenobee@192.webp"
+            src={sender.profilePic}
           />
         </div>
       </div>
       <div className="chat-header mb-1">
-        Obi-Wan Kenobi
-        <time className="text-xs opacity-50">12:45</time>
+        {sender.firstName} {sender.lastName}
+        <time className="text-xs opacity-50">{`${new Date(message.createdAt).getHours()}`.padStart(2, "0")}:{`${new Date(message.createdAt).getMinutes()}`.padStart(2, "0")}</time>
       </div>
       <div
         className={`flex items-center gap-2 ${
@@ -41,7 +41,7 @@ export default function MessageBox({ text, number }) {
             number % 2 != 0 ? "chat-bubble-primary" : ""
           }`}
         >
-          {text}
+          {message.text}
         </div>
         <div className={`dropdown ${number%2 != 0 ? "dropdown-left" : "dropdown-right"}`}>
           <Ellipsis tabIndex={0} role="button" className={`${hover ? "text-white/60 hover:text-white" : "hidden"} size-5 cursor-pointer`}/>
@@ -50,7 +50,7 @@ export default function MessageBox({ text, number }) {
             className="dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-sm"
           >
             <li onClick={(e)=>{
-                navigator.clipboard.writeText(text);
+                navigator.clipboard.writeText(message.text);
                 toast.success("Text Copied")
             }}>
               <a>Copy</a>

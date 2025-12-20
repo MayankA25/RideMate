@@ -17,6 +17,62 @@ export default function AddRideModal({ index, id }) {
   const { addRide, edit, updateRide } = useRideStore();
   const [destinationChanging, setDestinationChanging] = useState(false);
   const [arrivalChanging, setArrivalChanging] = useState(false);
+  const validateRide = ()=>{
+      let val = true;
+      const pickup = rideDetails.pickup;
+      const destination = rideDetails.destination;
+
+      console.log("Pickup: ", pickup);
+
+      if(pickup.address.trim().length == 0 ){
+        val = false;
+        toast.error("Pickup is required");
+        return val;
+      }
+      if(pickup.place_id.trim().length == 0){
+        val = false;
+        toast.error("Select Pickup From Suggestions")
+        return val;
+      }
+      if(destination.address.trim().length == 0 ){
+        val = false;
+        toast.error("Pickup is required");
+        return val;
+      }
+      if(destination.place_id.trim().length == 0){
+        val = false;
+        toast.error("Select Pickup From Suggestions")
+        return val;
+      }
+
+      if(rideDetails.departureDate.trim().length == 0){
+        val = false;
+        toast.error("Departure Date is required");
+        return val;
+      }
+      if(rideDetails.carName.trim().length == 0){
+        val = false;
+        toast.error("Car Name is required");
+        return val;
+      }
+      if(rideDetails.carColor.trim().length == 0){
+        val = false;
+        toast.error("Car Color is required");
+        return val;
+      }
+      if(rideDetails.fare == 0){
+        val = false;
+        toast.error("Fare is required");
+        return val;
+      }
+      if(rideDetails.numberOfPassengers == 0){
+        val = false;
+        toast.error("Number of passengers is required");
+        return val;
+      }
+
+      return val;
+  }
   return (
     <dialog id={`my_add_ride_modal_${index}`} className="modal">
       <div className="modal-box">
@@ -63,6 +119,11 @@ export default function AddRideModal({ index, id }) {
                           rideDetails.destination.place_id.trim().length != 0 &&
                           place.place_id == rideDetails.destination.place_id
                         ) {
+                          setRideDetails({ pickup: {
+                            ...rideDetails.pickup,
+                            address: ""
+                          } });
+                          setPlaces([])
                           return toast.error(
                             "Pickup and Destination cannot be same"
                           );
@@ -98,7 +159,9 @@ export default function AddRideModal({ index, id }) {
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="pickup-address" className="font-semibold">Pickup Address Line 1</label>
-            <input type="text" id="pickup-address" className="input input-primary focus:outline-0 w-full focus:bg-base-200" placeholder="Address Information" />
+            <input type="text" id="pickup-address" className="input input-primary focus:outline-0 w-full focus:bg-base-200" placeholder="Address Information" onClick={()=>{
+              
+            }} />
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="destination" className="font-semibold">
@@ -143,6 +206,11 @@ export default function AddRideModal({ index, id }) {
                           rideDetails.pickup.place_id.trim().length != 0 &&
                           rideDetails.pickup.place_id == place.place_id
                         ) {
+                          setRideDetails({ destination: {
+                            ...rideDetails.destination,
+                            address: ""
+                          } });
+                          setPlaces([]);
                           return toast.error(
                             "Pickup and Destination cannot be same"
                           );
@@ -272,17 +340,18 @@ export default function AddRideModal({ index, id }) {
             <button
               className="btn btn-primary"
               onClick={() => {
+               if(!validateRide()) return; 
                 edit
-                  ? toast.promise(updateRide(id), {
+                  ?  toast.promise(updateRide(id), {
                       loading: "Publishing...",
                       success: "Published",
                       error: "Error While Publishing",
                     })
-                  : toast.promise(addRide(), {
+                  :  toast.promise(addRide(), {
                       loading: "Publishing...",
                       success: "Published",
                       error: "Error While Publishing",
-                    });
+                    })
               }}
             >
               {edit ? "Update" : "Add"}

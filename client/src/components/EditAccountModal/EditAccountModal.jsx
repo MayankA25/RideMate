@@ -65,7 +65,9 @@ export default function EditAccountModal() {
 
   useEffect(()=>{
     setEditAccountDetails({ phone: phone });
-  }, [phone])
+  }, [phone]);
+
+  const genders = ["Male", "Female", "Other"]
 
 
   return (
@@ -75,15 +77,15 @@ export default function EditAccountModal() {
         <div className="py-4 flex items-center ">
           <div className="flex flex-col w-full gap-3">
             <div className="flex flex-col justify-center gap-2">
-              <label htmlFor="firstName" className="font-semibold">First Name</label>
+              <label htmlFor="firstName" className="font-semibold">First Name<span className="text-red-400 mx-1">*</span></label>
               <input type="text" id="firstName" name="firstName" value={user.firstName} readOnly className="border rounded-md py-2.5 px-3 border-indigo-500 focus:outline-0 focus:border-2 w-full bg-base-200 focus:bg-base-300" />
             </div>
             <div className="flex flex-col justify-center gap-2">
-              <label htmlFor="lastName" className="font-semibold">Last Name</label>
+              <label htmlFor="lastName" className="font-semibold">Last Name<span className="text-red-400 mx-1">*</span></label>
               <input type="text" id="lastName" name="lastName" value={user.lastName} readOnly className="border rounded-md py-2.5 px-3 border-indigo-500 focus:outline-0 focus:border-2 w-full bg-base-200 focus:bg-base-300" />
             </div>
             <div className="flex flex-col justify-center gap-2">
-              <label htmlFor="email" className="font-semibold">Email</label>
+              <label htmlFor="email" className="font-semibold">Email<span className="text-red-400 mx-1">*</span></label>
               <input type="text" id="email" name="email" className="border rounded-md py-2.5 px-3 border-indigo-500 focus:outline-0 focus:border-2 w-full bg-base-200 focus:bg-base-300" value={user.email} readOnly />
             </div>
             <div className="flex flex-col jusitify-center gap-2">
@@ -99,8 +101,19 @@ export default function EditAccountModal() {
               onChange={setPhone}
             />
             </div>
-            <div className="flex flex-col justify-center">
-              <label htmlFor="country" className="font-semibold">Country</label>
+            <div className="flex flex-col justify-center gap-2">
+              <label htmlFor="gender" className="font-semibold">Gender<span className="text-red-400 mx-1">*</span></label>
+              <select name="gender" id="gender" className="border rounded-md py-2.5 px-3 border-indigo-500 focus:outline-0 focus:border-2 w-full bg-base-200 focus:bg-base-300" defaultValue={user.gender}
+              onChange={(e)=>{
+                setEditAccountDetails({ gender: e.target.value })
+              }}>
+                {genders.map((gender, index)=>{
+                  return <option>{gender}</option>
+                })}
+              </select>
+            </div>
+            <div className="flex flex-col justify-center gap-2">
+              <label htmlFor="country" className="font-semibold">Country<span className="text-red-400 mx-1">*</span></label>
               <select name="country" id="country" className="border rounded-md py-2.5 px-3 border-indigo-500 focus:outline-0 focus:border-2 w-full bg-base-200 focus:bg-base-300" defaultValue={countryISOCode} onChange={(e)=>{
                 const foundCountryIndex = countries.findIndex((countryElem, index)=>countryElem.isoCode == e.target.value);
                 setSelectedCountry(countries[foundCountryIndex].name);
@@ -115,8 +128,8 @@ export default function EditAccountModal() {
                 })}
               </select>
             </div>
-            <div className="flex flex-col justify-center">
-              <label htmlFor="country" className="font-semibold">States</label>
+            <div className="flex flex-col justify-center gap-2">
+              <label htmlFor="country" className="font-semibold">States<span className="text-red-400 mx-1">*</span></label>
               <select name="country" id="country" className="border rounded-md py-2.5 px-3 border-indigo-500 focus:outline-0 focus:border-2 w-full bg-base-200 focus:bg-base-300" defaultValue={stateISOCode} onClick={(e)=>{
                 const foundStateIndex = states.findIndex((stateElem, index)=>stateElem.isoCode == e.target.value);
                 setSelectedState(states[foundStateIndex].name);

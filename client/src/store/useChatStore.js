@@ -41,6 +41,7 @@ const useChatStore = create((set, get)=>({
     },
 
     getMessages: async(groupId)=>{
+        console.log("Group Id: ", groupId);
         try{
             const response = await axiosInstance.get("/chat/getmessages", {
                 params: {
@@ -48,24 +49,45 @@ const useChatStore = create((set, get)=>({
                 }
             });
             console.log("Response: ", response.data);
+            set({ messages: response.data.messages })
         }catch(e){
             console.log(e);
         }
     },
 
-    sendMessage: async(senderId, groupId, text)=>{
+    sendMessage: async(senderId, groupId, text, rideId)=>{
         try{
             const response = await axiosInstance.post("/chat/sendmessage", {
                 senderId: senderId,
                 groupId: groupId,
-                text: text
+                text: text,
+                rideId: rideId
             });
 
             console.log("Response: ", response.data);
         }catch(e){
             console.log(e);
         }
+    },
+
+    subscribeToGroupMessages: ()=>{
+        const { socket } = useAuthStore.getState();
+
+        socket.on("newGroupMessage", (message)=>{
+            const messages = [...get().messages];
+            console.log("Messages: ", messages);
+            console.log("New Message from socket: ", message);
+            messages.push(message);
+            console.log("New Messages: ", messages);
+            set({ messages: messages });
+        })
+    },
+
+    unsubscribeToGroupMessages: async()=>{
+        const { socket } = useAuthStore.getState();
+        socket.off('newGroupMessage')
     }
+
 }))
 
 

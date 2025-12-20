@@ -8,10 +8,10 @@ export default function Documents() {
     getRequests();
   }, []);
   return (
-    <div className="w-[80%] h-full">
+    <div className="w-[78%] m-auto h-full">
       <div className="flex w-full">
         <div className="flex flex-col w-full gap-8">
-          <div className="flex items-center justify-between font-bold text-xl bg-neutral w-full p-4 px-8">
+          <div className="flex items-center justify-between font-bold text-xl w-full p-4 px-8">
             <h1>Requests</h1>
           </div>
           <div className="flex flex-col justify-center w-full px-3 gap-15">

@@ -254,12 +254,12 @@ export default function RideInfo() {
                           alt=""
                         />
                       </div>
-                      {passenger._id != user._id && (
+                      {passenger._id != user?._id && (
                         <h1 className="font-bold text-lg">
                           {passenger.firstName} {passenger.lastName}
                         </h1>
                       )}
-                      { passenger._id == user._id && <h1 className="font-bold text-lg">
+                      { passenger._id == user?._id && <h1 className="font-bold text-lg">
                         You
                       </h1> }
                     </div>
@@ -291,7 +291,7 @@ export default function RideInfo() {
             <h1 className="font-bold cursor-pointer">Report Ride</h1>
           </div>
         </div>
-        {user?._id != selectedRide?.driver?._id && <div className="flex items-center justify-center fixed bottom-0 w-full left-0">
+        {user && user?._id != selectedRide?.driver?._id && <div className="flex items-center justify-center fixed bottom-0 w-full left-0">
           <button
             disabled={!authenticated || checkIfUserIsPassenger()}
             className="btn btn-primary w-full py-8 text-xl"

@@ -42,6 +42,8 @@ export default function Form() {
     setFormDetails({ phone: phone || "" });
   }, [phone]);
 
+  const genders = ["--Select Gender--", "Male", "Female", "Other"];
+
   const handleProfilePicUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -127,6 +129,20 @@ export default function Form() {
               onChange={setPhone}
             />
           </div>
+          <div className="flex flex-col justify-center gap-2">
+            <label htmlFor="gender" className="font-bold text-lg">Gender <span className="mx-1 text-red-400">*</span></label>
+            <select name="gender" id="gender" className="border rounded-md py-2.5 px-3 border-indigo-500 focus:outline-0 focus:border-2 w-full bg-base-200 focus:bg-base-300" onChange={(e)=>{
+              if(e.target.value == genders[0]) return;
+              console.log("Value: ", e.target.value);
+              setFormDetails({ gender: e.target.value })
+            }}>
+              {genders.map((gender, index)=>{
+                return <option key={index} value={gender}>
+                  {gender}
+                </option>
+              })}
+            </select>
+          </div>
           <div className="flex items-center gap-5">
             <div className="flex flex-col justify-center w-full gap-2">
               <label htmlFor="country" className="text-lg font-bold">
@@ -204,7 +220,9 @@ export default function Form() {
         <div className="flex items-center my-3">
           <button
             className="btn bg-indigo-500/5 hover:bg-indigo-500 border border-indigo-500 px-7 rounded-lg font-bold"
-            onClick={() => {submitForm()}}
+            onClick={() => {
+              submitForm();
+            }}
           >
             Submit
           </button>

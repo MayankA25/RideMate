@@ -14,7 +14,8 @@ export const useAuthStore = create((set, get)=>({
     editAccountDetails: {
         phone: "",
         country: "",
-        state: ""
+        state: "",
+        gender: ""
     },
 
     specificUser: null,
