@@ -42,16 +42,16 @@ export const sendMessage = async(req, res)=>{
 
 
 export const updateMessage = async(req, res)=>{
-    const { messageId, newText } = req.body;
+    const { messageId, newText, rideId } = req.body;
 
     try{
         const updatedMessage = await Message.findByIdAndUpdate(messageId, {
             text: newText
-        });
+        }, { new: true }).populate('group').populate('sender').populate('parentId');
 
         console.log("Updated Message: ", updatedMessage);
 
-        io.to(rideId).emit('editedGroupMessage', updatedMessage)
+        io.to(rideId).emit('updatedGroupMessage', updatedMessage)
 
         return res.status(200).json({ msg: "Message has beem updated", message: updatedMessage });
     }catch(e){
@@ -66,7 +66,10 @@ export const deleteMessage = async(req, res)=>{
 
     try{
         await Message.findByIdAndDelete(messageId);
-        return res.status(200).json({ msg: "Message Deleted Successfully" })
+
+        io.to(rideId).emit("deletedGroupMessageId", messageId);
+
+        return res.status(200).json({ msg: "Message Deleted Successfully" });
     }catch(e){
         console.log(e);
         return res.status(500).json({ msg: "Internal Server Error" })

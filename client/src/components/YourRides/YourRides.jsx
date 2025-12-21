@@ -42,7 +42,7 @@ export default function YourRides() {
               className="bg-indigo-900 px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 font-bold"
               onMouseOver={()=>{
                 setEdit(false);
-                setRideDetails({ pickup: { coordinate: [], address: '', place_id: '' }, destination: { coordinates: [], address: '', place_id: '' }, departureDate: '', carName: '', carColor: '', fare: 0, availableSeats: 0 })
+                setRideDetails({ pickup: { coordinates: [], address: '', place_id: '', addressLine1: "" }, destination: { coordinates: [], address: '', place_id: '', addressLine1: "" }, departureDate: '', carName: '', carColor: '', fare: 0, availableSeats: 0 })
               }}
               onClick={() =>
                 document.getElementById("my_add_ride_modal_number").showModal()

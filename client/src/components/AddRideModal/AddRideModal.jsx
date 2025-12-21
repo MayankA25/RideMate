@@ -130,6 +130,7 @@ export default function AddRideModal({ index, id }) {
                         }
                         setRideDetails({
                           pickup: {
+                            ...rideDetails.pickup,
                             coordinates: place.coords,
                             address: `${place.name ? `${place.name}, ` : ""}${
                               place.info
@@ -159,9 +160,14 @@ export default function AddRideModal({ index, id }) {
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="pickup-address" className="font-semibold">Pickup Address Line 1</label>
-            <input type="text" id="pickup-address" className="input input-primary focus:outline-0 w-full focus:bg-base-200" placeholder="Address Information" onClick={()=>{
-              
-            }} />
+            <input type="text" id="pickup-address" className="input input-primary focus:outline-0 w-full focus:bg-base-200" placeholder="Address Information" value={rideDetails.pickup.addressLine1 || ""} onChange={(e)=>{
+              setRideDetails({
+                pickup: {
+                  ...rideDetails.pickup,
+                  addressLine1: e.target.value
+                }
+              })
+            }}/>
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="destination" className="font-semibold">
@@ -246,7 +252,12 @@ export default function AddRideModal({ index, id }) {
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="destination-address" className="font-semibold">Destination Address Line 1</label>
-            <input type="text" id="destination-address" className="input input-primary focus:outline-0 w-full focus:bg-base-200" placeholder="Destination Information" />
+            <input type="text" id="destination-address" className="input input-primary focus:outline-0 w-full focus:bg-base-200" placeholder="Destination Information" value={rideDetails.destination.addressLine1 || ""} onChange={(e)=>{
+              setRideDetails({ destination: {
+                ...rideDetails.destination,
+                addressLine1: e.target.value
+              } })
+            }} />
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="departureDate" className="font-semibold">

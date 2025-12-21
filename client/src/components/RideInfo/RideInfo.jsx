@@ -31,7 +31,7 @@ export default function RideInfo() {
 
   const { authenticated } = useAuthStore();
 
-  const { setStartCoords, setEndCoords } = useMapStore()
+  const { setStartCoords, setEndCoords } = useMapStore();
 
   const getDifferenceTime = () => {
     const departure = new Date(selectedRide?.departureDate).getTime();
@@ -84,9 +84,23 @@ export default function RideInfo() {
               <div className="flex items-center gap-3">
                 <Circle className="size-5" />
                 <div className="flex flex-col justify-center">
-                  <span>{selectedRide?.pickup.address.split(",")[0]}</span>
+                  <div className="flex items-center gap-3">
+                    <span>{selectedRide?.pickup.address.split(",")[0]}</span>
+                    <Map
+                      className="size-5 cursor-pointer text-indigo-400"
+                      onClick={() => {
+                        setStartCoords(
+                          selectedRide?.pickup.coordinates.reverse()
+                        );
+                        setEndCoords(
+                          selectedRide?.destination.coordinates.reverse()
+                        );
+                        navigate(`/map/${selectedRide?._id}`);
+                      }}
+                    />
+                  </div>
                   <span className="text-sm font-semibold text-white/50">
-                    {selectedRide?.pickup.address
+                     {!selectedRide?.pickup.addressLine1 ? "" : `${selectedRide?.pickup.addressLine1},`}{selectedRide?.pickup.address
                       .split(",")
                       .map((elem, index) => {
                         if (index > 0) {
@@ -101,18 +115,29 @@ export default function RideInfo() {
                       .join("")}
                   </span>
                 </div>
-                <Map className="size-5 cursor-pointer text-indigo-400" onClick={()=>{
-                  setStartCoords(selectedRide?.pickup.coordinates.reverse());
-                  setEndCoords(selectedRide?.destination.coordinates.reverse());
-                  navigate(`/map/${selectedRide?._id}`)
-                }}/>
               </div>
               <div className="flex items-center gap-3">
                 <Circle className="size-5 bg-white rounded-full" />
                 <div className="flex flex-col justify-center">
-                  <span>{selectedRide?.destination.address.split(",")[0]}</span>
+                  <div className="flex items-center gap-3">
+                    <span>
+                      {selectedRide?.destination.address.split(",")[0]}
+                    </span>
+                    <Map
+                      className="size-5 cursor-pointer text-indigo-400"
+                      onClick={() => {
+                        setStartCoords(
+                          selectedRide?.pickup.coordinates.reverse()
+                        );
+                        setEndCoords(
+                          selectedRide?.destination.coordinates.reverse()
+                        );
+                        navigate(`/map/${selectedRide?._id}`);
+                      }}
+                    />
+                  </div>
                   <span className="font-semibold text-white/50">
-                    {selectedRide?.destination.address
+                    {!selectedRide?.destination.addressLine1 ? "" : `${selectedRide?.destination.addressLine1},`}{selectedRide?.destination.address
                       .split(",")
                       .map((elem, index) => {
                         if (index > 0) {
@@ -128,15 +153,10 @@ export default function RideInfo() {
                       })}
                   </span>
                 </div>
-                <Map className="size-5 cursor-pointer text-indigo-400" onClick={()=>{
-                  setStartCoords(selectedRide?.destination.coordinates.reverse())
-                  setEndCoords(selectedRide?.pickup.coordinates.reverse());
-                  navigate(`/map/${selectedRide?._id}`)
-                }}/>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 justify-center pt-14">
+          <div className="grid grid-cols-1 justify-center pt-14 text-center lg:text-left">
             <h1 className="font-bold text-lg">
               {`${new Date(selectedRide?.departureDate).getHours()}`.padStart(
                 2,
@@ -259,9 +279,9 @@ export default function RideInfo() {
                           {passenger.firstName} {passenger.lastName}
                         </h1>
                       )}
-                      { passenger._id == user?._id && <h1 className="font-bold text-lg">
-                        You
-                      </h1> }
+                      {passenger._id == user?._id && (
+                        <h1 className="font-bold text-lg">You</h1>
+                      )}
                     </div>
                     <div className="flex items-center">
                       <ChevronRight />
@@ -291,17 +311,21 @@ export default function RideInfo() {
             <h1 className="font-bold cursor-pointer">Report Ride</h1>
           </div>
         </div>
-        {user && user?._id != selectedRide?.driver?._id && <div className="flex items-center justify-center fixed bottom-0 w-full left-0">
-          <button
-            disabled={!authenticated || checkIfUserIsPassenger()}
-            className="btn btn-primary w-full py-8 text-xl"
-            onClick={() => {
-              document.getElementById(`my_ride_confirm_modal_${2}`).showModal();
-            }}
-          >
-            {checkIfUserIsPassenger() ? "Booked" : "Book Now"}
-          </button>
-        </div>}
+        {user && user?._id != selectedRide?.driver?._id && (
+          <div className="flex items-center justify-center fixed bottom-0 w-full left-0">
+            <button
+              disabled={!authenticated || checkIfUserIsPassenger()}
+              className="btn btn-primary w-full py-8 text-xl"
+              onClick={() => {
+                document
+                  .getElementById(`my_ride_confirm_modal_${2}`)
+                  .showModal();
+              }}
+            >
+              {checkIfUserIsPassenger() ? "Booked" : "Book Now"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

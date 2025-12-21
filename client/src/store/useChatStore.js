@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { useAuthStore } from "./useAuthStore";
 import { axiosInstance } from "../lib/axios";
-import { Group } from "lucide-react";
+import { CopyMinus, Group } from "lucide-react";
+import toast from "react-hot-toast";
 
 
 const useChatStore = create((set, get)=>({
@@ -11,6 +12,13 @@ const useChatStore = create((set, get)=>({
     online: -1,
 
     selectedGroup: {},
+
+    replyToMessage: null,
+
+    setReplyToMessage: (val)=>{
+        console.log("Reply To Message Id: ", val);
+        set({ replyToMessage: val })
+    },
 
     joinRoom: (rideId)=>{
         const { socket } = useAuthStore.getState();
@@ -70,6 +78,35 @@ const useChatStore = create((set, get)=>({
         }
     },
 
+    updateMessage: async(messageId, text, rideId)=>{
+        try{
+
+            const response = await axiosInstance.put("/chat/updatemessage", {
+                messageId: messageId,
+                newText: text,
+                rideId: rideId
+            });
+            console.log("Response: ", response.data);
+        }catch(e){
+            console.log(e);
+            toast.error("Error While Updating Message");
+        }
+    },
+
+    deleteMessage: async(messageId)=>{
+        try {
+            const response = await axiosInstance.delete("/chat/deletemessage", {
+                params: {
+                    messageId: messageId
+                }
+            });
+
+            console.log("Response: ", response.data);
+        } catch (e) {
+            console.log(e);
+        }
+    },
+
     subscribeToGroupMessages: ()=>{
         const { socket } = useAuthStore.getState();
 
@@ -79,6 +116,31 @@ const useChatStore = create((set, get)=>({
             console.log("New Message from socket: ", message);
             messages.push(message);
             console.log("New Messages: ", messages);
+            set({ messages: messages });
+        });
+
+        socket.on("updatedGroupMessage", (message)=>{
+            const messages = [...get().messages];
+            console.log("Messages: ", messages);
+            const foundIndex = messages.findIndex((msg, index)=>{
+                return msg._id == message._id
+            });
+            console.log("Found Index: ", foundIndex);
+
+            messages.splice(foundIndex, 1, message);
+
+            console.log("New Messages: ", messages);
+            set({ messages: messages })
+        })
+
+        socket.on("deleteGroupMessageId", (messageId)=>{
+            const messages = [...get().messages];
+            const foundIndex = messages.findIndex((message, index)=>{
+                return message._id == messageId
+            });
+
+            messages.splice(foundIndex, 1);
+
             set({ messages: messages });
         })
     },

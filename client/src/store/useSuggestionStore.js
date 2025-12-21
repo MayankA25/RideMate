@@ -31,11 +31,13 @@ export const useSuggestionStore = create((set, get)=>({
         pickup: {
             coordinates: [],
             address: '',
+            addressLine1: "",
             place_id: ''
         },
         destination: {
             coordinates: [],
             address: '',
+            addressLine1: "",
             place_id: ''
         },
         departureDate: '',

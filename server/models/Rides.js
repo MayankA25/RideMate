@@ -10,12 +10,14 @@ const rideSchema = new Schema({
         type: { type: String, default: "Point" },
         coordinates: { type: [Number], required: true },
         address: String,
+        addressLine1: String,
         place_id: { type: String, required: true }
     },
     destination:{
         type: { type: String, default: "Point" },
         coordinates: { type: [Number], required: true },
         address: String,
+        addressLine1: String,
         place_id: { type: String, required: true }
     },
     departureDate: {
