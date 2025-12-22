@@ -93,11 +93,12 @@ const useChatStore = create((set, get)=>({
         }
     },
 
-    deleteMessage: async(messageId)=>{
+    deleteMessage: async(messageId, rideId)=>{
         try {
             const response = await axiosInstance.delete("/chat/deletemessage", {
                 params: {
-                    messageId: messageId
+                    messageId: messageId,
+                    rideId: rideId
                 }
             });
 
@@ -133,15 +134,20 @@ const useChatStore = create((set, get)=>({
             set({ messages: messages })
         })
 
-        socket.on("deleteGroupMessageId", (messageId)=>{
+        socket.on("deletedGroupMessageId", (messageId)=>{
             const messages = [...get().messages];
             const foundIndex = messages.findIndex((message, index)=>{
                 return message._id == messageId
             });
 
+            if(foundIndex == -1) return;
+            console.log("Found Index: ", foundIndex);
+
             messages.splice(foundIndex, 1);
 
             set({ messages: messages });
+
+            toast.success("Deleted Message Successfully")
         })
     },
 

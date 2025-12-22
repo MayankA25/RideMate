@@ -62,7 +62,7 @@ export const updateMessage = async(req, res)=>{
 
 
 export const deleteMessage = async(req, res)=>{
-    const { messageId } = req.query;
+    const { messageId, rideId } = req.query;
 
     try{
         await Message.findByIdAndDelete(messageId);

@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import useChatStore from "../../store/useChatStore";
 import EditMessageModal from "../EditMessageModal/EditMessageModal";
 import { useAuthStore } from "../../store/useAuthStore";
+import DeleteMessageModal from "../DeleteMessageModal/DeleteMessageModal";
 
 export default function MessageBox({ message, number, sender }) {
   const [hover, setHover] = useState(false);
@@ -54,6 +55,7 @@ export default function MessageBox({ message, number, sender }) {
           {message.text}
         </div>
         <EditMessageModal messageId={message._id} messageText={message.text} rideId={params.id}/>
+        <DeleteMessageModal messageId={message._id} messageText={message.text} rideId={params.id} />
         <span className={`dropdown ${number%2 != 0 ? "dropdown-left" : "dropdown-right"}`}>
           <Ellipsis tabIndex={0} role="button" className={`${hover ? "text-white/60 hover:text-white" : "hidden"} size-5 cursor-pointer`}/>
           <ul
@@ -76,7 +78,9 @@ export default function MessageBox({ message, number, sender }) {
             }}>
               <a className="text-white/50 hover:text-white"><Pen className="size-4"/>Edit</a>
             </li>}
-            {sender._id == user._id && <li>
+            {sender._id == user._id && <li onClick={()=>{
+              document.getElementById(`my_delete_message_modal_${message._id}`).showModal()
+            }}>
               <a className="text-white/50 hover:text-white"><Trash className="size-4"/>Delete</a>
             </li>}
           </ul>
