@@ -18,6 +18,10 @@ const messageSchema = new Schema({
         ref: 'Message'
     },
 
+    parentSenderName: {
+        type: String
+    },
+
     text: {
         type: String,
         required: true

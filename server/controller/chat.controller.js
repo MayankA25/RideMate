@@ -1,4 +1,5 @@
 import { Message } from "../models/Message.js";
+import { User } from "../models/User.js";
 import { io } from "../utils/socket.js";
 
 export const getMessages = async(req, res)=>{
@@ -73,5 +74,34 @@ export const deleteMessage = async(req, res)=>{
     }catch(e){
         console.log(e);
         return res.status(500).json({ msg: "Internal Server Error" })
+    }
+}
+
+export const replyToMessage = async(req, res)=>{
+    const { senderId, groupId, text, parentId, rideId } = req.body;
+    try{
+
+        const foundSender = await User.findById(senderId);
+
+        const newMessage = new Message({
+            sender: senderId,
+            group: groupId,
+            text: text,
+            parentId: parentId,
+            parentSenderName: `${foundSender.firstName} ${foundSender.lastName}`
+        });
+
+        const savedReply = await newMessage.save();
+        console.log("Saved Reply: ", savedReply);
+
+        const newReply = await (await (await savedReply.populate('sender')).populate('group')).populate('parentId');
+
+        io.to(rideId).emit("newGroupMessage", newReply);
+
+        return res.status(200).json({ msg: "Reply Send Successfully" });
+    }
+    catch(e){
+        console.log(e);
+        return res.status(500).json({ msg: "Internal Server Error" });
     }
 }

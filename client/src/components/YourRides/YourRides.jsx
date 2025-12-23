@@ -96,7 +96,7 @@ export default function YourRides() {
                         navigate(`/dashboard/chat/${ride._id}`);
                         getSelectedGroup(ride.group._id);
                       }}><MessageCircle className="size-5"/>Go To Chat</button>
-                      <button className="btn btn-primary font-bold"><User className="size-5"/> Show Passengers</button>
+                      {/* <button className="btn btn-primary font-bold"><User className="size-5"/> Show Passengers</button> */}
                       <button className="btn btn-primary font-bold" onMouseOver={()=>{setEdit(true); setRideDetails({ pickup: ride.pickup, destination: ride.destination, departureDate: getFormattedDate(ride.departureDate), carName: ride.carName, carColor: ride.carColor, fare: ride.fare, availableSeats: ride.availableSeats })}} onClick={()=>{document.getElementById(`my_add_ride_modal_${index}`).showModal()}}><PenBox className="size-5"/> Edit Ride</button>
                       <button className="btn btn-error text-white font-bold" onClick={()=>{ deleteRide(ride._id) }}><X/> Delete</button>
                     </div>

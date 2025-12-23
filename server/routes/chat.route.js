@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteMessage, getMessages, sendMessage, updateMessage } from "../controller/chat.controller.js";
+import { deleteMessage, getMessages, replyToMessage, sendMessage, updateMessage } from "../controller/chat.controller.js";
 
 
 
@@ -9,6 +9,7 @@ chatRouter.get("/getmessages", getMessages);
 chatRouter.post("/sendmessage", sendMessage);
 chatRouter.put("/updatemessage", updateMessage);
 chatRouter.delete('/deletemessage', deleteMessage);
+chatRouter.post("/reply", replyToMessage);
 
 
 

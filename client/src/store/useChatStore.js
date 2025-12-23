@@ -108,6 +108,22 @@ const useChatStore = create((set, get)=>({
         }
     },
 
+    reply: async(senderId, groupId, text, rideId)=>{
+        try{
+            const response = await axiosInstance.post("/chat/reply", {
+                senderId: senderId,
+                groupId: groupId,
+                text: text,
+                parentId: get().replyToMessage,
+                rideId: rideId
+            });
+            console.log("Response: ", response.data);
+        }catch(e){
+            console.log(e);
+            toast.error("Error While Replying")
+        }
+    },
+
     subscribeToGroupMessages: ()=>{
         const { socket } = useAuthStore.getState();
 

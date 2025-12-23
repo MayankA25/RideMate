@@ -6,7 +6,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useParams } from "react-router-dom";
 
 export default function ChatBox() {
-  const { sendMessage, selectedGroup, replyToMessage, setReplyToMessage } = useChatStore();
+  const { sendMessage, selectedGroup, replyToMessage, setReplyToMessage, reply } = useChatStore();
 
   const { user } = useAuthStore();
 
@@ -55,8 +55,10 @@ export default function ChatBox() {
           ref={ref}
           className="flex items-center justify-center bg-primary p-3 rounded-md cursor-pointer hover:bg-primary/80 transition-all"
           onClick={() => {
+            replyToMessage ? reply(user._id, selectedGroup._id, senderMessage, params.id) :
             sendMessage(user._id, selectedGroup._id, senderMessage, params.id);
             setSenderMessage("");
+            setReplyToMessage(null);
           }}
         >
           <Send className="size-4" />
