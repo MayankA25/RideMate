@@ -26,7 +26,7 @@ function App() {
   }, []);
 
   return (
-    <div className="relative w-[100vw] h-[100vh] overflow-x-hidden">
+    <div className="relative w-[100vw] h-[100vh] overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-base-300">
 
       <Routes>
         <Route exact path="/" element={<LandingPage />}></Route>

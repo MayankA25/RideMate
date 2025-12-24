@@ -168,12 +168,35 @@ export const useRideStore = create((set, get) => ({
 
       rides.splice(foundIndex, 1, response.data.ride);
 
-      set({ rides: rides });
+      set({ rides: rides, selectedRide: response.data.ride });
 
       socket.emit("join-room", { rideId: rideId });
     } catch (e) {
       console.log(e);
       toast.error("Error While Joining Ride");
+    }
+  },
+
+  cancelRide: async(rideId)=>{
+    const bookedRides = [...get().bookedRides];
+    console.log("Ride Id: ", rideId);
+    try{
+      const response = await axiosInstance.post("/rides/cancelride", {
+        rideId: rideId
+      });
+      console.log("Response: ", response.data);
+
+      const foundIndex = bookedRides.findIndex((ride, index)=>{
+        return rideId == ride._id;
+      });
+      console.log("Found Index: ", foundIndex);
+
+      bookedRides.splice(foundIndex, 1);
+
+      set({ bookedRides: bookedRides });
+
+    }catch(e){
+      console.log(e);
     }
   },
 

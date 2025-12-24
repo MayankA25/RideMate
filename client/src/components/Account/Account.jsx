@@ -114,7 +114,7 @@ export default function Account() {
                   </div>
                 </div>
               </div>
-              <h1 className="text-lg font-semibold">{user && params.id == user._id ? user?.role[0] : specificUser?.role[0]}</h1>
+              {/* <h1 className="text-lg font-semibold">{user && params.id == user._id ? user?.role[0] : specificUser?.role[0]}</h1> */}
             </div>
           </div>
           {user && params.id == user._id && <div className="flex flex-col justify-center w-full gap-8 pl-10">

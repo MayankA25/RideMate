@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react'
 import { useRideStore } from '../../store/userRideStore'
-import { ArrowLeft, BadgeCheck, ChevronRight, MessageCircle, User } from 'lucide-react';
+import { ArrowLeft, BadgeCheck, ChevronRight, MessageCircle, User, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useChatStore from '../../store/useChatStore';
 
 export default function Bookings() {
 
-  const { getBookedRides, bookedRides } = useRideStore();
+  const { getBookedRides, bookedRides, cancelRide } = useRideStore();
   const { getSelectedGroup } = useChatStore()
 
   useEffect(()=>{
@@ -77,6 +77,12 @@ export default function Bookings() {
                         navigate(`/dashboard/chat/${ride._id}`);
                         getSelectedGroup(ride.group._id)
                       }}><MessageCircle className="size-5"/><span>Go To Chat</span></button>
+                      <button className='flex items-center btn btn-error text-white font-bold' onClick={()=>{
+                        cancelRide(ride._id)
+                      }}>
+                        <span><X/></span>
+                        <span>Cancel Ride</span>
+                      </button>
                     </div>
                   </div>
                   <hr className="opacity-30 w-[95%] m-auto" />
@@ -97,7 +103,7 @@ export default function Bookings() {
                           <h1 className="font-bold text-lg">
                             {ride.driver.firstName}
                           </h1>
-                          <BadgeCheck
+                          {ride.driver.aadharCardStatus == 'verified' || ride.driver.drivingLicenseStatus == 'verified' &&<BadgeCheck
                             className={`${
                               ((ride.driver.aadharCardStatus == "verified" &&
                                 ride.driver.drivingLicenseStatus !=
@@ -111,7 +117,7 @@ export default function Bookings() {
                               ride.driver.drivingLicenseStatus == "verified" &&
                               "text-green-300"
                             }`}
-                          />
+                          />}
                         </div>
                       </div>
                       <div className="flex items-center justify-center">

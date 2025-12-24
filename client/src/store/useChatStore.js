@@ -15,9 +15,22 @@ const useChatStore = create((set, get)=>({
 
     replyToMessage: null,
 
+    selectedReplyMessageIndex: null,
+
     setReplyToMessage: (val)=>{
         console.log("Reply To Message Id: ", val);
         set({ replyToMessage: val })
+    },
+
+    setSelectedReplyMessageIndex: async(parentId)=>{
+        console.log("Parent Id: ", parentId);
+        const messages = [...get().messages];
+        const foundIndex = messages.findIndex((msg, index)=>{
+            return msg._id == parentId
+        });
+        console.log("Found Index: ", foundIndex);
+        console.log("Found Message: ", messages[foundIndex]);
+        set({ selectedReplyMessageIndex: foundIndex })
     },
 
     joinRoom: (rideId)=>{

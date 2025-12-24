@@ -1,4 +1,5 @@
 import { Request } from "../models/Requests.js";
+import { Ride } from "../models/Rides.js";
 import { User } from "../models/User.js";
 import { validatePhone } from "../utils/phone.js";
 
@@ -63,7 +64,7 @@ export const submitForm = async (req, res) => {
         state: state,
         profilePic: profilePic,
         initialFormSubmitted: true,
-        gender: gender
+        gender: gender,
       },
       { new: true }
     );
@@ -74,7 +75,7 @@ export const submitForm = async (req, res) => {
       country: country,
       state: state,
       profilePic: profilePic,
-      gender: gender
+      gender: gender,
     };
     console.log("Updated User: ", updatedUser);
 
@@ -142,9 +143,13 @@ export const submitDocument = async (req, res) => {
     console.log("Documents: ", documents);
 
     if (foundRequest) {
-      const updatedRequest = await Request.findByIdAndUpdate(foundRequest._id, {
-        documents: [...foundRequest.documents, ...documents],
-      }, { new: true });
+      const updatedRequest = await Request.findByIdAndUpdate(
+        foundRequest._id,
+        {
+          documents: [...foundRequest.documents, ...documents],
+        },
+        { new: true }
+      );
       console.log("Updated Request: ", updatedRequest);
       return res
         .status(200)
@@ -200,32 +205,79 @@ export const updateProfilePicture = async (req, res) => {
 //     }
 // }
 
-export const getSpecificUser = async(req, res)=>{
+export const getSpecificUser = async (req, res) => {
   const { id } = req.query;
 
-  try{
+  try {
     console.log("ID: ", id);
     const foundUser = await User.findById(id);
 
-    if(!foundUser) return res.status(404).json({ msg: "User Not Found" });
+    if (!foundUser) return res.status(404).json({ msg: "User Not Found" });
 
-    console.log("Specific User: ", foundUser);
+    const accessingUserId = req.session.passport.user.user._id;
+    let specificUser = { ...foundUser._doc };
 
-    return res.status(200).json({ user: foundUser });
-  }catch(e){
+    // Checking If accessing user shares any ride with the specific user needed
+
+    const foundRide1 = await Ride.find({
+      passengers: { $all: [accessingUserId, id] }
+    })
+
+    console.log("Found Ride 1 : ", foundRide1);
+
+    const foundRide2 = await Ride.find({
+      $or: [
+        {
+          $and: [
+            { passengers: accessingUserId },
+            { driver: id }
+          ]
+        },
+        {
+          $and: [
+            { driver: accessingUserId },
+            { passengers: id }
+          ]
+        }
+      ]
+    });
+
+    console.log("Found Ride 2: ", foundRide2)
+
+
+
+
+    if (accessingUserId != id && (foundRide1.length == 0 && foundRide2.length == 0)) {
+      specificUser = {
+        ...specificUser,
+        phone: `${specificUser.phone.slice(0, 4)}${[...Array(6)].map(
+          () => "*"
+        ).join("")}${specificUser.phone.slice(
+          specificUser.phone.length - 2,
+          specificUser.phone.length
+        )}`,
+        email: `${specificUser.email.charAt(0)}${[...Array(10)].map(()=>"*").join("")}@${specificUser.email.split("@")[1]}`
+      };
+    }
+
+    console.log("Specific User: ", specificUser);
+
+    console.log("Specific User: ", specificUser);
+
+    return res.status(200).json({ user: specificUser });
+  } catch (e) {
     console.log(e);
-    return res.status(404).json({ msg: "Not Found" })
+    return res.status(404).json({ msg: "Not Found" });
   }
-
-}
+};
 
 export const logout = async (req, res) => {
-  if(req.session){
-    req.logout(()=>{
-      req.session.destroy(()=>{
-        res.clearCookie('connect.sid', { path: "/" });
+  if (req.session) {
+    req.logout(() => {
+      req.session.destroy(() => {
+        res.clearCookie("connect.sid", { path: "/" });
         res.status(200).json({ msg: "Logged Out Successfully" });
-      })
-    })
+      });
+    });
   }
 };

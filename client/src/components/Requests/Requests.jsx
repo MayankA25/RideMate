@@ -10,15 +10,12 @@ export default function Documents() {
   return (
     <div className="w-[78%] m-auto h-full">
       <div className="flex w-full">
-        <div className="flex flex-col w-full gap-8">
-          <div className="flex items-center justify-between font-bold text-xl w-full p-4 px-8">
-            <h1>Requests</h1>
-          </div>
+        <div className="flex flex-col w-full gap-8 py-5">
           <div className="flex flex-col justify-center w-full px-3 gap-15">
             <div className="flex items-center-w-full">
               <input
                 type="text"
-                className="w-[85%] m-auto input input-primary"
+                className="w-[85%] m-auto input input-primary focus:outline-0"
                 placeholder="Search Requests By Name/Email"
               />
             </div>
@@ -27,7 +24,7 @@ export default function Documents() {
                 <h1 className="font-bold text-2xl">Requests</h1>
                 <select
                   defaultValue="All Requests"
-                  className="select select-primary"
+                  className="select select-primary focus:outline-0"
                 >
                   <option>All Requests</option>
                   <option>Pending Requests</option>

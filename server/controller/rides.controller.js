@@ -1,6 +1,6 @@
 import { Ride } from "../models/Rides.js";
 import { getEstimatedTimeOfArrival } from "../utils/routing.js";
-import { Group } from "../models/Group.js"; 
+import { Group } from "../models/Group.js";
 
 export const getAllRides = async (req, res) => {
   const { pickup, destination, departureDate } = req.query;
@@ -10,7 +10,6 @@ export const getAllRides = async (req, res) => {
   console.log("Destination: ", destinationJson);
   console.log("Departure Date: ", departureDate);
   try {
-
     console.log("User Departure Date: ", new Date(departureDate));
 
     // const utcNewDate = new Date(departureDate).getTime() + (timezoneOffsetInMinutes * 60 * 1000);
@@ -24,36 +23,32 @@ export const getAllRides = async (req, res) => {
     const splittedDate = departureDate.split("-");
 
     const year = Number.parseInt(splittedDate[0]);
-    const month = Number.parseInt(splittedDate[1])-1;
+    const month = Number.parseInt(splittedDate[1]) - 1;
     const date = Number.parseInt(splittedDate[2]);
-
 
     console.log("Year: ", year, "Month: ", month, "Date: ", date);
 
     const startDate = new Date(year, month, date, 0, 0, 0, 0);
     const endDate = new Date(year, month, date, 24, 0, 0, 0);
 
-
-    console.log("Start Date: ", startDate)
-    console.log("End Date: ", endDate)
+    console.log("Start Date: ", startDate);
+    console.log("End Date: ", endDate);
 
     const rides = await Ride.find({
       "pickup.place_id": pickupJson.place_id,
       "destination.place_id": destinationJson.place_id,
       departureDate: {
         $gte: new Date(startDate),
-        $lt: new Date(endDate)
+        $lt: new Date(endDate),
       },
-      driver: { $ne: req.session.passport.user.user._id }
+      driver: { $ne: req.session.passport.user.user._id },
     })
       .populate("driver")
       .populate("passengers")
       .populate("group");
     console.log("Rides: ", rides);
 
-    return res
-      .status(200)
-      .json({ msg: "All Available Rides", rides: rides });
+    return res.status(200).json({ msg: "All Available Rides", rides: rides });
   } catch (e) {
     console.log(e);
     return res.status(500).json({ msg: "Internal Server Error" });
@@ -63,7 +58,10 @@ export const getAllRides = async (req, res) => {
 export const getDriverRides = async (req, res) => {
   const { driverId } = req.query;
   try {
-    const foundRides = await Ride.find({ driver: driverId }).populate("driver").populate('passengers').populate('group');
+    const foundRides = await Ride.find({ driver: driverId })
+      .populate("driver")
+      .populate("passengers")
+      .populate("group");
     console.log("Driver Rides: ", foundRides);
 
     return res.status(200).json({ rides: foundRides });
@@ -141,7 +139,7 @@ export const addRide = async (req, res) => {
 };
 
 export const updateRide = async (req, res) => {
-  const { rideId, pickup, destination, departureDate, fare, availableSeats } =
+  const { rideId, pickup, destination, departureDate, fare,carName, carColor, availableSeats } =
     req.body;
   const pickupCoords = [...pickup.coordinates].reverse();
   const destinationCoords = [...destination.coordinates].reverse();
@@ -179,7 +177,7 @@ export const updateRide = async (req, res) => {
     }`;
 
     const updatedGroup = await Group.findByIdAndUpdate(
-      updateRide.group._id,
+      updatedRide.group._id,
       {
         name: newGroupName,
       },
@@ -260,31 +258,58 @@ export const joinRide = async (req, res) => {
   }
 };
 
-export const getBookedRides = async (req, res) => {
+export const cancelRide = async (req, res) => {
+  const { rideId } = await req.body;
   try {
-    const rides = await Ride.find({})
+    const userId = req.session.passport.user.user._id;
+    const updatedRide = await Ride.findByIdAndUpdate(
+      rideId,
+      {
+        $pull: { passengers: userId },
+      },
+      { new: true }
+    )
       .populate("driver")
       .populate("passengers")
       .populate("group");
 
-    const filteredRides = rides.filter((ride, index) => {
-      let found = false;
+    console.log("Updated Ride: ", updatedRide);
+    return res
+      .status(200)
+      .json({ msg: "Ride cancelled successfully", ride: updatedRide });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
 
-      for (let i = 0; i < ride.passengers.length; i++) {
-        if (ride.passengers[i]._id == req.session.passport.user.user._id) {
-          found = true;
-          break;
-        }
-      }
+export const getBookedRides = async (req, res) => {
+  try {
+    const rides = await Ride.find({
+      passengers: req.session.passport.user.user._id,
+    })
+      .populate("driver")
+      .populate("passengers")
+      .populate("group");
 
-      if (found) {
-        return ride;
-      }
-    });
+    // const filteredRides = rides.filter((ride, index) => {
+    //   let found = false;
 
-    console.log("Filtered Ride: ", filteredRides);
+    //   for (let i = 0; i < ride.passengers.length; i++) {
+    //     if (ride.passengers[i]._id == req.session.passport.user.user._id) {
+    //       found = true;
+    //       break;
+    //     }
+    //   }
 
-    return res.status(200).json({ rides: filteredRides });
+    //   if (found) {
+    //     return ride;
+    //   }
+    // });
+
+    console.log("Filtered Ride: ", rides);
+
+    return res.status(200).json({ rides: rides });
   } catch (e) {
     console.log(e);
     return res.status(500).json({ msg: "Internal Server Error" });

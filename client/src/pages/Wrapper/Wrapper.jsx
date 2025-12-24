@@ -7,7 +7,7 @@ import { Route, Routes } from 'react-router-dom';
 export default function Wrapper() {
   const { user } = useAuthStore();
   return (
-    <div className='w-full h-[100vh] flex items-center'>
+    <div className='w-full h-[100vh] flex relative '>
         {user && <Sidebar/>}
         <Routes>
           <Route path='rides/:id' element={<RideInfo/>}/>

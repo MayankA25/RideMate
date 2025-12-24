@@ -9,7 +9,7 @@ import {
   Trash,
   Triangle,
 } from "lucide-react";
-import React from "react";
+import React, { useRef } from "react";
 import { useState } from "react";
 import MoreInfo from "../MoreInfo/MoreInfo";
 import toast from "react-hot-toast";
@@ -27,13 +27,27 @@ export default function MessageBox({ message, number, sender, index }) {
 
   console.log("Ride Id: ", params.id);
 
-  const { setReplyToMessage } = useChatStore();
+  const {
+    setReplyToMessage,
+    setSelectedReplyMessageIndex,
+    selectedReplyMessageIndex,
+  } = useChatStore();
   const { user } = useAuthStore();
 
+  useEffect(()=>{
+    if(selectedReplyMessageIndex != null){
+      document.getElementById(`message_${selectedReplyMessageIndex}`)?.scrollIntoView({
+        behavior: "smooth"
+      });
+    }
+  }, [selectedReplyMessageIndex])
 
   return (
     <div
-      className={`chat ${number % 2 == 0 ? "chat-start" : "chat-end"}`}
+      id={`message_${index}`}
+      className={`chat ${
+        number % 2 == 0 ? "chat-start px-4" : "chat-end"
+      }  transition-all duration-300 relative`}
       onMouseOver={() => {
         setHover(true);
       }}
@@ -41,6 +55,11 @@ export default function MessageBox({ message, number, sender, index }) {
         setHover(false);
       }}
     >
+      <div
+        className={`flex items-center bg-primary/20 h-[115%] absolute left-0 w-[110%] ${
+          index == selectedReplyMessageIndex ? "opacity-100" : "opacity-0"
+        } transition-all duration-300`}
+      ></div>
       <div className="chat-image avatar">
         <div className="w-10 rounded-full">
           <img
@@ -67,27 +86,43 @@ export default function MessageBox({ message, number, sender, index }) {
           }`}
         >
           <div className="flex flex-col justify-center gap-3">
-            {message.parentId && <div
-              className={`flex items-center relative ${
-                number % 2 != 0 ? "bg-indigo-400" : "bg-base-100"
-              } p-2 rounded-lg`}
-            >
-              <div className="flex flex-col justify-center mx-4 gap-2">
-                <h1 className="font-bold">{ message.parentId.sender == user._id ? "You" : message.parentSenderName }</h1>
-                <h1
-                  className={`font-bold ${
-                    number % 2 != 0 ? "text-white" : "text-white"
-                  }`}
-                >
-                  {message.parentId.text}
-                </h1>
-              </div>
+            {message.parentId && (
               <div
-                className={`flex h-full absolute ${
-                  number % 2 != 0 ? "bg-neutral/80" : "bg-indigo-500"
-                } p-1 rounded-l-lg left-0`}
-              ></div>
-            </div>}
+                className={`flex items-center relative ${
+                  number % 2 != 0 ? "bg-indigo-400" : "bg-base-100"
+                } p-2 rounded-lg cursor-pointer`}
+                onClick={() => {
+                  setSelectedReplyMessageIndex(message.parentId._id);
+                  setTimeout(() => {
+                    setSelectedReplyMessageIndex(null);
+                  }, 1000);
+                }}
+              >
+                <div className="flex flex-col justify-center mx-4 gap-2">
+                  <h1
+                    className={`font-bold text-shadow-lg ${
+                      number % 2 != 0 ? "" : "text-indigo-300"
+                    }`}
+                  >
+                    {message.parentId.sender == user._id
+                      ? "You"
+                      : message.parentSenderName}
+                  </h1>
+                  <h1
+                    className={`font-bold ${
+                      number % 2 != 0 ? "text-white/85" : "text-white"
+                    }`}
+                  >
+                    {message.parentId.text}
+                  </h1>
+                </div>
+                <div
+                  className={`flex h-full absolute ${
+                    number % 2 != 0 ? "bg-neutral/80" : "bg-indigo-500"
+                  } p-1 rounded-l-lg left-0`}
+                ></div>
+              </div>
+            )}
             <h1 className="font-bold">{message.text}</h1>
           </div>
         </div>

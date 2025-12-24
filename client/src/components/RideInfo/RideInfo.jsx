@@ -15,6 +15,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import RideBookingConfirmation from "../RideBookingConfirmation/RideBookingConfirmation";
 import toast from "react-hot-toast";
 import { useMapStore } from "../../store/useMapStore";
+import useChatStore from "../../store/useChatStore";
 
 export default function RideInfo() {
   const params = useParams();
@@ -32,6 +33,7 @@ export default function RideInfo() {
   const { authenticated } = useAuthStore();
 
   const { setStartCoords, setEndCoords } = useMapStore();
+  const { getSelectedGroup } = useChatStore();
 
   const getDifferenceTime = () => {
     const departure = new Date(selectedRide?.departureDate).getTime();
@@ -56,8 +58,8 @@ export default function RideInfo() {
   };
 
   return (
-    <div className="w-[78%] m-auto h-full py-8">
-      <div className="flex flex-col justify-center gap-5">
+    <div className="w-[78%] mx-auto h-full pt-8">
+      <div className="flex flex-col justify-between h-full gap-5">
         <div className="flex items-center">
           <span
             className="hover:bg-base-200 p-3 rounded-full transition-all duration-200 cursor-pointer"
@@ -201,7 +203,8 @@ export default function RideInfo() {
           </div>
         </div>
         <hr className="text-white/40" />
-        <div className="flex flex-col items-center w-full gap-5">
+        <div className="flex flex-col justify-center w-full gap-5 px-3">
+          <h1 className="font-bold text-xl">Driver</h1>
           <div
             className="flex items-center justify-between w-full px-5 py-4 hover:bg-white/10 rounded-xl cursor-pointer transition-all"
             onClick={() => {
@@ -215,7 +218,7 @@ export default function RideInfo() {
                 className="size-12 rounded-full"
               />
               <div className="flex items-center gap-2">
-                <h1 className="font-bold text-xl">
+                <h1 className="font-bold text-2xl">
                   {selectedRide?.driver.firstName}
                 </h1>
                 {(selectedRide?.driver.aadharCardStatus == "verified" ||
@@ -242,10 +245,13 @@ export default function RideInfo() {
               <ChevronRight />
             </div>
           </div>
-          {selectedRide?.driver._id != user?._id && (
+          {selectedRide?.passengers.includes(user._id) && (
             <div className="flex items-center w-full">
-              <button className="py-3 font-bold text-sm text-center w-full hover:bg-base-200 transition-all duration-300 cursor-pointer rounded-full border border-indigo-500">
-                Contact {selectedRide?.driver.firstName}
+              <button className="py-3 font-bold text-sm text-center w-full hover:bg-base-200 transition-all duration-300 cursor-pointer rounded-full border border-indigo-500" onClick={()=>{
+                navigate(`/dashboard/chat/${selectedRide._id}`);
+                getSelectedGroup(selectedRide.group)
+              }}>
+                Go To Ride Group
               </button>
             </div>
           )}
@@ -312,9 +318,9 @@ export default function RideInfo() {
           </div>
         </div>
         {user && user?._id != selectedRide?.driver?._id && (
-          <div className="flex items-center justify-center fixed bottom-0 w-full left-0">
+          <div className="flex items-center justify-center sticky bottom-0 w-[100vw] transform -translate-x-[11%]">
             <button
-              disabled={!authenticated || checkIfUserIsPassenger()}
+              disabled={!authenticated || checkIfUserIsPassenger(selectedRide)}
               className="btn btn-primary w-full py-8 text-xl"
               onClick={() => {
                 document
@@ -322,7 +328,22 @@ export default function RideInfo() {
                   .showModal();
               }}
             >
-              {checkIfUserIsPassenger() ? "Booked" : "Book Now"}
+              {checkIfUserIsPassenger(selectedRide) ? "Track Ride" : "Book Now"}
+            </button>
+          </div>
+        )}
+        {user && user?._id == selectedRide?.driver?._id && (
+          <div className="flex items-center justify-center sticky bottom-0 w-[100vw] transform -translate-x-[11%]">
+            <button
+              disabled={!authenticated}
+              className="btn btn-primary w-full py-8 text-xl"
+              onClick={() => {
+                document
+                  .getElementById(`my_ride_confirm_modal_${2}`)
+                  .showModal();
+              }}
+            >
+              {"Start Live Tracking"}
             </button>
           </div>
         )}
