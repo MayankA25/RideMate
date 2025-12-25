@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSuggestionStore } from "../../store/useSuggestionStore";
 import { getFormattedDate } from "../../../utils/date";
 import useChatStore from "../../store/useChatStore";
+import DeleteRideConfirmation from "../DeleteRideConfirmation/DeleteRideConfirmation";
 
 export default function YourRides() {
   const { getDriverRides, driverRides, setEdit, deleteRide } = useRideStore();
@@ -59,6 +60,7 @@ export default function YourRides() {
                   className="flex flex-col justify-center bg-base-200 shadow-xl gap-3 rounded-2xl py-1 px-2"
                 >
                   <AddRideModal index={index} id={ride._id} />
+                  <DeleteRideConfirmation index={index} rideId={ride._id} pickup={ride.pickup.address} destination={ride.destination.address} departureDate={new Date(ride.departureDate).toDateString()}/>
                   <div className="grid grid-cols-4 w-full">
                     <div className="flex items-center p-5 py-8 gap-10 pl-15 cursor-pointer" onClick={()=>{navigate(`/info/rides/${ride._id}`)}}>
                       {/* <div className="grid grid-cols-1 gap-8">
@@ -98,7 +100,7 @@ export default function YourRides() {
                       }}><MessageCircle className="size-5"/>Go To Chat</button>
                       {/* <button className="btn btn-primary font-bold"><User className="size-5"/> Show Passengers</button> */}
                       <button className="btn btn-primary font-bold" onMouseOver={()=>{setEdit(true); setRideDetails({ pickup: ride.pickup, destination: ride.destination, departureDate: getFormattedDate(ride.departureDate), carName: ride.carName, carColor: ride.carColor, fare: ride.fare, availableSeats: ride.availableSeats })}} onClick={()=>{document.getElementById(`my_add_ride_modal_${index}`).showModal()}}><PenBox className="size-5"/> Edit Ride</button>
-                      <button className="btn btn-error text-white font-bold" onClick={()=>{ deleteRide(ride._id) }}><X/> Delete</button>
+                      <button className="btn btn-error text-white font-bold" onClick={()=>{ document.getElementById(`my_ride_deletion_confirmation_modal_${index}`).showModal() }}><X/> Delete</button>
                     </div>
                   </div>
                   <hr className="opacity-30 w-[95%] m-auto" />

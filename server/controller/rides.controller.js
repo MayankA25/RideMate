@@ -229,6 +229,13 @@ export const joinRide = async (req, res) => {
   const { rideId, userId } = req.body;
 
   try {
+
+    const foundRide = await Ride.findById(rideId);
+
+    if(foundRide.passengers.length >= foundRide.availableSeats){
+      return res.status(400).json({ msg: "Ride capacity is full" });
+    }
+
     const updatedRide = await Ride.findByIdAndUpdate(
       rideId,
       { $push: { passengers: userId } },
@@ -274,6 +281,15 @@ export const cancelRide = async (req, res) => {
       .populate("group");
 
     console.log("Updated Ride: ", updatedRide);
+    const updatedGroup = await Group.findByIdAndUpdate(updatedRide.group._id,
+      {
+        $pull: { members: userId }
+      },
+      { new: true }
+    );
+
+    console.log("Updated Group: ", updatedGroup);
+
     return res
       .status(200)
       .json({ msg: "Ride cancelled successfully", ride: updatedRide });

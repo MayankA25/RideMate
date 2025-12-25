@@ -67,8 +67,8 @@ function Route({ waypoints, color = "red" }) {
         if(i == 0){
           icon = L.icon({
             iconUrl: '/pickup_marker.png',
-            iconSize: [100, 100],
-            iconAnchor: [50, 80]
+            iconSize: [70, 70],
+            iconAnchor: [35, 50]
           }) 
         }else if(i == nwps-1){
           icon = L.icon({

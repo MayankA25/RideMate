@@ -7,20 +7,21 @@ export default function RideBookingConfirmation({
   pickup,
   destination,
   rideId,
+  number
 }) {
   const { user } = useAuthStore();
-  const { joinRide } = useRideStore();
+  const { joinRide, cancelRide } = useRideStore();
   return (
-    <dialog id={`my_ride_confirm_modal_${index}`} className="modal">
+    <dialog id={`my_ride_confirm_modal_${index}_${number}`} className="modal">
       <div className="modal-box">
-        <h3 className="font-bold text-lg">Confirm Booking</h3>
+        <h3 className="font-bold text-lg">Confirm {number == 0 ? "Booking" : "Cancellation"}</h3>
         <div className="flex flex-col justify-center">
           <p className="py-4 font-semibold">
-            Are your sure you want to book ride from{" "}
+            Are your sure you want to <span className="text-red-300 font-bold">{ number == 0 ? "book" : "cancel" }</span> ride from{" "}
             <span className="font-bold text-indigo-300">{pickup}</span> to{" "}
             <span className="font-bold text-indigo-300">{destination}</span> ?
           </p>
-          <p className="font-semibold text-center text-red-200">After joining the ride your profile details will be visible to passengers and driver until ride is completed</p>
+          <p className="font-semibold text-center text-red-200">After { number == 0 ? "booking" : "cancelling" } the ride your profile details will {number == 0 ? "be visible" : "no longer be visible"} to passengers and driver{number == 0 ? " until the ride is complete" : "."}</p>
         </div>
         <div className="modal-action">
           <form method="dialog" className="flex gap-2">
@@ -29,7 +30,7 @@ export default function RideBookingConfirmation({
             <button
               className="btn btn-primary"
               onClick={() => {
-                joinRide(rideId, user._id);
+                number == 0 ? joinRide(rideId, user._id) : cancelRide(rideId);
               }}
             >
               Yes

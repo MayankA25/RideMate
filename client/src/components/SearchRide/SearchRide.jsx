@@ -126,6 +126,7 @@ export default function SearchRide() {
               className="input input-primary w-full focus:outline-0"
               id="going-to"
               placeholder="Arrival Location"
+              value={searchDetails.destination.address}
               onChange={(e) => {
                 setDestinationChanging(true);
                 setArrivalChanging(false);

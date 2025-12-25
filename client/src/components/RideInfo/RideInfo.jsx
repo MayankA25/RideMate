@@ -76,6 +76,7 @@ export default function RideInfo() {
           pickup={selectedRide?.pickup.address}
           destination={selectedRide?.destination.address}
           rideId={selectedRide?._id}
+          number={0}
         />
         <div className="grid grid-cols-2">
           <div className="flex flex-col justify-center gap-8 font-bold px-5">
@@ -245,7 +246,7 @@ export default function RideInfo() {
               <ChevronRight />
             </div>
           </div>
-          {selectedRide?.passengers.includes(user._id) && (
+          {selectedRide?.passengers.includes(user?._id) && (
             <div className="flex items-center w-full">
               <button className="py-3 font-bold text-sm text-center w-full hover:bg-base-200 transition-all duration-300 cursor-pointer rounded-full border border-indigo-500" onClick={()=>{
                 navigate(`/dashboard/chat/${selectedRide._id}`);
@@ -312,10 +313,10 @@ export default function RideInfo() {
               Share Ride
             </h1>
           </div>
-          <div className="flex items-center text-indigo-300 gap-3">
+          {/* <div className="flex items-center text-indigo-300 gap-3">
             <TriangleAlert className="cursor-pointer" />
             <h1 className="font-bold cursor-pointer">Report Ride</h1>
-          </div>
+          </div> */}
         </div>
         {user && user?._id != selectedRide?.driver?._id && (
           <div className="flex items-center justify-center sticky bottom-0 w-[100vw] transform -translate-x-[11%]">
@@ -324,7 +325,7 @@ export default function RideInfo() {
               className="btn btn-primary w-full py-8 text-xl"
               onClick={() => {
                 document
-                  .getElementById(`my_ride_confirm_modal_${2}`)
+                  .getElementById(`my_ride_confirm_modal_${2}_${0}`)
                   .showModal();
               }}
             >
@@ -339,7 +340,7 @@ export default function RideInfo() {
               className="btn btn-primary w-full py-8 text-xl"
               onClick={() => {
                 document
-                  .getElementById(`my_ride_confirm_modal_${2}`)
+                  .getElementById(`my_ride_confirm_modal_${2}_${0}`)
                   .showModal();
               }}
             >

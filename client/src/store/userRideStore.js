@@ -20,6 +20,10 @@ export const useRideStore = create((set, get) => ({
 
   bookedRides: [],
 
+
+  cancelling: false,
+  joining: false,
+
   getAllRides: async () => {
     const { searchDetails } = useSuggestionStore.getState();
     try {
@@ -157,6 +161,7 @@ export const useRideStore = create((set, get) => ({
     const { socket } = useAuthStore.getState();
     const rides = [...get().rides];
     try {
+      set({ joining: true });
       const foundIndex = rides.findIndex((ride, index) => ride._id == rideId);
 
       const response = await axiosInstance.post("/rides/joinride", {
@@ -174,6 +179,8 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       toast.error("Error While Joining Ride");
+    }finally{
+      set({ joining: false });
     }
   },
 
@@ -181,6 +188,7 @@ export const useRideStore = create((set, get) => ({
     const bookedRides = [...get().bookedRides];
     console.log("Ride Id: ", rideId);
     try{
+      set({ cancelling: true });
       const response = await axiosInstance.post("/rides/cancelride", {
         rideId: rideId
       });
@@ -195,8 +203,12 @@ export const useRideStore = create((set, get) => ({
 
       set({ bookedRides: bookedRides });
 
+      toast.success("Ride Cacelled Succesfully")
+
     }catch(e){
       console.log(e);
+    }finally{
+      set({ cancelling: false });
     }
   },
 

@@ -15,7 +15,7 @@ import RideBookingConfirmation from "../RideBookingConfirmation/RideBookingConfi
 
 export default function Rides() {
   const navigate = useNavigate();
-  const { rides, getAllRides, joinRide, checkIfUserIsPassenger } =
+  const { rides, getAllRides, joinRide, checkIfUserIsPassenger, joining } =
     useRideStore();
 
   const { infoFilled, setInfoFilled } = useSuggestionStore();
@@ -65,6 +65,7 @@ export default function Rides() {
                     pickup={ride.pickup.address}
                     destination={ride.destination.address}
                     rideId={ride._id}
+                    number={0}
                   />
                   <div className="grid grid-cols-4 w-full">
                     <div
@@ -124,11 +125,11 @@ export default function Rides() {
                     </div>
                     <div className="flex flex-col justify-center gap-3 p-3">
                       <button
-                        disabled={checkIfUserIsPassenger(ride)}
+                        disabled={checkIfUserIsPassenger(ride) || joining}
                         className="btn btn-primary font-bold"
                         onClick={() => {
                           document
-                            .getElementById(`my_ride_confirm_modal_${index}`)
+                            .getElementById(`my_ride_confirm_modal_${index}_${0}`)
                             .showModal();
                         }}
                       >

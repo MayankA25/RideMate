@@ -36,12 +36,12 @@ export default function AddRideModal({ index, id }) {
       }
       if(destination.address.trim().length == 0 ){
         val = false;
-        toast.error("Pickup is required");
+        toast.error("Destination is required");
         return val;
       }
       if(destination.place_id.trim().length == 0){
         val = false;
-        toast.error("Select Pickup From Suggestions")
+        toast.error("Select Destination From Suggestions")
         return val;
       }
 
@@ -80,7 +80,7 @@ export default function AddRideModal({ index, id }) {
         <div className="flex flex-col justify-center py-4 gap-3">
           <div className="flex flex-col justify-center gap-1 relative">
             <label htmlFor="pickup" className="font-semibold">
-              Pickup Location
+              Pickup Location<span className="text-red-400">*</span>
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -171,7 +171,7 @@ export default function AddRideModal({ index, id }) {
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="destination" className="font-semibold">
-              Destination
+              Destination<span className="text-red-400">*</span>
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -261,7 +261,7 @@ export default function AddRideModal({ index, id }) {
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="departureDate" className="font-semibold">
-              Departure Date
+              Departure Date<span className="text-red-400">*</span>
             </label>
             <input
               type="datetime-local"
@@ -279,7 +279,7 @@ export default function AddRideModal({ index, id }) {
             />
           </div>
           <div className="flex flex-col justify-center gap-1">
-            <label htmlFor="carName">Car Name</label>
+            <label htmlFor="carName" className="font-semibold">Car Name<span className="text-red-400">*</span></label>
             <input
               type="text"
               id="carName"
@@ -292,7 +292,7 @@ export default function AddRideModal({ index, id }) {
             />
           </div>
           <div className="flex flex-col justify-center gap-1">
-            <label htmlFor="carColor">Car Color</label>
+            <label htmlFor="carColor" className="font-semibold">Car Color</label>
             <input
               type="text"
               id="carColor"
@@ -316,7 +316,7 @@ export default function AddRideModal({ index, id }) {
               value={rideDetails.fare}
               onChange={(e) => {
                 setRideDetails({
-                  fare: isNaN(Number.parseInt(e.target.value))
+                  fare: e.target.value.trim().length!= 0 && isNaN(Number.parseInt(e.target.value))
                     ? 0
                     : Number.parseInt(e.target.value),
                 });
@@ -336,7 +336,7 @@ export default function AddRideModal({ index, id }) {
               value={rideDetails.availableSeats}
               onChange={(e) => {
                 setRideDetails({
-                  availableSeats: isNaN(Number.parseInt(e.target.value))
+                  availableSeats: e.target.value.trim().length!= 0 && isNaN(Number.parseInt(e.target.value))
                     ? 0
                     : Number.parseInt(e.target.value),
                 });
