@@ -292,7 +292,7 @@ export default function AddRideModal({ index, id }) {
             />
           </div>
           <div className="flex flex-col justify-center gap-1">
-            <label htmlFor="carColor" className="font-semibold">Car Color</label>
+            <label htmlFor="carColor" className="font-semibold">Car Color<span className="text-red-400">*</span></label>
             <input
               type="text"
               id="carColor"
@@ -306,7 +306,7 @@ export default function AddRideModal({ index, id }) {
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="fare" className="font-semibold">
-              Fare
+              Fare<span className="text-red-400">*</span>
             </label>
             <input
               type="number"
@@ -325,7 +325,7 @@ export default function AddRideModal({ index, id }) {
           </div>
           <div className="flex flex-col justify-center gap-1">
             <label htmlFor="seats" className="font-semibold">
-              Available Seats
+              Available Seats<span className="text-red-400">*</span>
             </label>
             <input
               type="number"
@@ -352,6 +352,11 @@ export default function AddRideModal({ index, id }) {
               className="btn btn-primary"
               onClick={() => {
                if(!validateRide()) return; 
+               const departureTimeInMilliSeconds = new Date(rideDetails.departureDate).getTime(); // UTC 
+               const currentTimeInMilliSeconds = new Date().getTime() // UTC
+
+               if(currentTimeInMilliSeconds >= departureTimeInMilliSeconds) return toast.error("Invalid Departure Date");
+
                 edit
                   ?  toast.promise(updateRide(id), {
                       loading: "Publishing...",

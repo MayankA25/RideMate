@@ -214,7 +214,7 @@ export const getSpecificUser = async (req, res) => {
 
     if (!foundUser) return res.status(404).json({ msg: "User Not Found" });
 
-    const accessingUserId = req.session.passport.user.user._id;
+    const accessingUserId = req.session.passport?.user?.user?._id;
     let specificUser = { ...foundUser._doc };
 
     // Checking If accessing user shares any ride with the specific user needed
@@ -247,7 +247,7 @@ export const getSpecificUser = async (req, res) => {
 
 
 
-    if (accessingUserId != id && (foundRide1.length == 0 && foundRide2.length == 0)) {
+    if (!accessingUserId || (accessingUserId != id && (foundRide1.length == 0 && foundRide2.length == 0))) {
       specificUser = {
         ...specificUser,
         phone: `${specificUser.phone.slice(0, 4)}${[...Array(6)].map(

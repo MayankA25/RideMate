@@ -6,7 +6,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 
 export default function UploadDocModal({ document, index }) {
   const [status, setStatus] = useState(false);
-  const [docUrl, setDocUrl] = useState('');
+  const [docUrl, setDocUrl] = useState("");
   const { submitDocuments } = useAuthStore();
 
   const handleDocumnetUpload = async (e) => {
@@ -26,7 +26,13 @@ export default function UploadDocModal({ document, index }) {
       <div className="modal-box py-12">
         <form method="dialog">
           {/* if there is a button in form, it will close the modal */}
-          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={()=>{setStatus(false); setDocUrl('')}}>
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={() => {
+              setStatus(false);
+              setDocUrl("");
+            }}
+          >
             ✕
           </button>
         </form>
@@ -49,14 +55,27 @@ export default function UploadDocModal({ document, index }) {
               {status == "uploading" && <Loader2 className="animate-spin" />}
               {status == "uploaded" && <Check className="text-green-400" />}
             </p>
-           {status=="uploaded" && <a href={docUrl} target="_blank" className="btn btn-primary">Show Document</a>}
+            {status == "uploaded" && (
+              <a href={docUrl} target="_blank" className="btn btn-primary">
+                Show Document
+              </a>
+            )}
           </div>
           <div className="modal-action">
             <form method="dialog">
-            <button className="btn btn-primary absolute right-6 bottom-3 bg-indigo-500/10 border border-indigo-500 rounded-lg hover:bg-indigo-500" onClick={()=>{submitDocuments(index == 1 ? {aadharCard: docUrl} : {drivingLicense: docUrl})}}>
-              Submit
-            </button>
-      </form>
+              <button
+                className="btn btn-primary absolute right-6 bottom-3 bg-indigo-500/10 border border-indigo-500 rounded-lg hover:bg-indigo-500"
+                onClick={() => {
+                  submitDocuments(
+                    index == 1
+                      ? { aadharCard: docUrl }
+                      : { drivingLicense: docUrl }
+                  );
+                }}
+              >
+                Submit
+              </button>
+            </form>
           </div>
         </div>
       </div>

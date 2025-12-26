@@ -136,6 +136,7 @@ export const useAuthStore = create((set, get)=>({
         const { user, setUser } = useAuthStore.getState();
         try{
             console.log("Doc Obj: ", documentObj);
+            if(documentObj?.aadharCard?.trim()?.length == 0 || documentObj?.drivingLicense?.trim()?.length == 0) return;
             const response = await axiosInstance.post("/auth/submitdocument", {id: user._id, ...documentObj});
             console.log("Response: ", response.data);
             setUser(response.data.updatedUser);

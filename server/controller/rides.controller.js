@@ -1,6 +1,7 @@
 import { Ride } from "../models/Rides.js";
 import { getEstimatedTimeOfArrival } from "../utils/routing.js";
 import { Group } from "../models/Group.js";
+import { mailQueue } from "../utils/queue.js";
 
 export const getAllRides = async (req, res) => {
   const { pickup, destination, departureDate } = req.query;
@@ -91,6 +92,12 @@ export const addRide = async (req, res) => {
       "Destination Coords: ",
       destinationCoords
     );
+    const departureTimeInMilliSeconds = new Date(departureDate).getTime();
+    const currentTimeInMilliSeconds = new Date().getTime();
+
+    if (currentTimeInMilliSeconds >= departureTimeInMilliSeconds)
+      return res.status(400).json({ msg: "Error Occurred" });
+
     const estimatedISOString = await getEstimatedTimeOfArrival(
       new Date(departureDate).toISOString(),
       pickupCoords,
@@ -139,10 +146,23 @@ export const addRide = async (req, res) => {
 };
 
 export const updateRide = async (req, res) => {
-  const { rideId, pickup, destination, departureDate, fare,carName, carColor, availableSeats } =
-    req.body;
+  const {
+    rideId,
+    pickup,
+    destination,
+    departureDate,
+    fare,
+    carName,
+    carColor,
+    availableSeats,
+  } = req.body;
   const pickupCoords = [...pickup.coordinates].reverse();
   const destinationCoords = [...destination.coordinates].reverse();
+
+  const foundRide = await Ride.findById(rideId)
+    .populate("driver")
+    .populate("passengers")
+    .populate("group");
 
   console.log("Pickup: ", pickupCoords, "Destination: ", destinationCoords);
   const date = new Date(departureDate).toISOString();
@@ -184,7 +204,50 @@ export const updateRide = async (req, res) => {
       { new: true }
     );
 
+    const senderMail = req.session.passport.user.user.email;
+    const accessToken = req.session.passport.user.accessToken;
+    const refreshToken = req.session.passport.user.refreshToken;
+    const cc = [];
+    const bcc = [];
     console.log("Updated Group: ", updatedGroup);
+
+    const subject = `Regarding your ride booking from ${
+      foundRide.pickup.address
+    } to ${foundRide.destination.address} on ${new Date(
+      foundRide.departureDate
+    ).toDateString()}`;
+
+    // const message = `Your ride booking from ${foundRide.pickup.address} to ${
+    //   foundRide.destination.address
+    // } on ${new Date(
+    //   foundRide.departureDate
+    // ).toDateString()} which is assigned to me, has now been updated to the ride from ${
+    //   updatedRide.pickup.address
+    // } to ${updatedRide.destination.address} scheduled on ${new Date(
+    //   updatedRide.departureDate
+    // ).toDateString()}.<br></br><br>>/br>Sorry for the inconvenience caused`;
+
+    const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${foundRide.pickup.address}</span> to <span style="font-weight:700">${foundRide.destination.address}</span> on <span style="font-weight:700">${new Date(foundRide.departureDate).toDateString()}</span> which is assigned to me, has now been updated to the ride from <span style="font-weight:700">${updatedRide.pickup.address}</span> to <span style="font-weight:700">${updatedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(updatedRide.departureDate).toDateString()}</span>.
+    <br><br>
+    <br></br>
+    Sorry for the inconvenience caused
+    </span>`;
+
+    if (updatedRide.passengers.length > 0) {
+      updatedRide.passengers.forEach(async (passenger, index) => {
+        await mailQueue.add("mailQueue", {
+          senderMail,
+          recipient: passenger.email,
+          accessToken,
+          refreshToken,
+          subject,
+          message,
+          cc,
+          bcc,
+          attachment: [],
+        });
+      });
+    }
 
     return res
       .status(200)
@@ -198,10 +261,39 @@ export const updateRide = async (req, res) => {
 export const deleteRide = async (req, res) => {
   const { rideId } = req.query;
   try {
-    const deletedRide = await Ride.findByIdAndDelete(rideId);
+    const deletedRide = await Ride.findByIdAndDelete(rideId).populate('driver').populate('passengers').populate('group');
     console.log("Deleted Ride: ", deletedRide);
     const deletedGroup = await Group.findByIdAndDelete(deletedRide.group);
     console.log("Deleted Group: ", deletedGroup);
+    const senderMail = req.session.passport.user.user.email;
+    const accessToken = req.session.passport.user.accessToken;
+    const refreshToken = req.session.passport.user.refreshToken;
+    const cc = [];
+    const bcc = [];
+    const subject = `Regarding your ride booking from ${deletedRide.pickup.address} to ${deletedRide.destination.address} scheduled on ${new Date(deletedRide.departureDate).toDateString()}`;
+    const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${deletedRide.pickup.address}</span> to <span style="font-weight:700">${deletedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(deletedRide.departureDate).toDateString()}</span> which was assigned to me, has been deleted and is no longer available on the RideMate</span>.
+    <br><br>
+    <br></br>
+    Kindly refer to other rides available on RideMate.
+    <br><br>
+    <br></br>
+    Sorry for the inconvenience caused
+    </span>`;
+    if(deletedRide.passengers.length > 0){
+      deletedRide.passengers.forEach(async(passenger, index)=>{
+        await mailQueue.add('mailQueue', {
+          senderMail,
+          recipient: passenger.email,
+          accessToken,
+          refreshToken,
+          subject,
+          message,
+          cc,
+          bcc,
+          attachment: []
+        })
+      })
+    }
     return res.status(200).json({ msg: "Ride Deleted Successfully" });
   } catch (e) {
     console.log(e);
@@ -229,10 +321,9 @@ export const joinRide = async (req, res) => {
   const { rideId, userId } = req.body;
 
   try {
-
     const foundRide = await Ride.findById(rideId);
 
-    if(foundRide.passengers.length >= foundRide.availableSeats){
+    if (foundRide.passengers.length >= foundRide.availableSeats) {
       return res.status(400).json({ msg: "Ride capacity is full" });
     }
 
@@ -281,9 +372,10 @@ export const cancelRide = async (req, res) => {
       .populate("group");
 
     console.log("Updated Ride: ", updatedRide);
-    const updatedGroup = await Group.findByIdAndUpdate(updatedRide.group._id,
+    const updatedGroup = await Group.findByIdAndUpdate(
+      updatedRide.group._id,
       {
-        $pull: { members: userId }
+        $pull: { members: userId },
       },
       { new: true }
     );
