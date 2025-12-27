@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import UserItem from '../UserItem/UserItem';
 
 export default function User() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function User() {
         </div>
         <hr className='opacity-25' />
         <div className="flex flex-col justify-center">
-          
+          <UserItem/>
         </div>
       </div>
     </div>

@@ -61,6 +61,7 @@ app.use("/api/rides", rideRouter);
 app.use("/api/suggestions", suggestionRouter);
 app.use("/api/group", groupRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/users")
 
 const PORT = process.env.PORT;
 server.listen(PORT, ()=>{
