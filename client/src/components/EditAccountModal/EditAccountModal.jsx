@@ -108,7 +108,7 @@ export default function EditAccountModal() {
                 setEditAccountDetails({ gender: e.target.value })
               }}>
                 {genders.map((gender, index)=>{
-                  return <option>{gender}</option>
+                  return <option key={index}>{gender}</option>
                 })}
               </select>
             </div>

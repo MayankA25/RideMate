@@ -242,12 +242,14 @@ export const getSpecificUser = async (req, res) => {
       ]
     });
 
-    console.log("Found Ride 2: ", foundRide2)
+    console.log("Found Ride 2: ", foundRide2);
+
+    const user = req.session.passport.user.user;
+
+    const isUserSuperAdmin = user.role.includes("SuperAdmin");
 
 
-
-
-    if (!accessingUserId || (accessingUserId != id && (foundRide1.length == 0 && foundRide2.length == 0))) {
+    if (!isUserSuperAdmin && (!accessingUserId || (accessingUserId != id && (foundRide1.length == 0 && foundRide2.length == 0)))) {
       specificUser = {
         ...specificUser,
         phone: `${specificUser.phone.slice(0, 4)}${[...Array(6)].map(

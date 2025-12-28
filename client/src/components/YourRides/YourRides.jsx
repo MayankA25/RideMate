@@ -7,16 +7,16 @@ import { useSuggestionStore } from "../../store/useSuggestionStore";
 import { getFormattedDate } from "../../../utils/date";
 import useChatStore from "../../store/useChatStore";
 import DeleteRideConfirmation from "../DeleteRideConfirmation/DeleteRideConfirmation";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function YourRides() {
-  const { getDriverRides, driverRides, setEdit, deleteRide } = useRideStore();
-  const { setRideDetails, suggesting } = useSuggestionStore();
-  const { getMessages } = useChatStore();
+  const { getDriverRides, driverRides, setEdit } = useRideStore();
+  const { setRideDetails } = useSuggestionStore();
+  const { user } = useAuthStore();
   useEffect(() => {
     getDriverRides();
   }, []);
   const navigate = useNavigate();
-  const { suggestPlace } = useSuggestionStore();
   const { getSelectedGroup } = useChatStore();
   return (
     <div className="w-[78%] h-full m-auto">
@@ -119,7 +119,7 @@ export default function YourRides() {
                         />
                         <div className="flex items-center gap-2.5">
                           <h1 className="font-bold text-lg">
-                            {ride.driver.firstName}
+                            {ride.driver._id == user._id ? "You" : ride.driver.firstName}
                           </h1>
                           {(ride.driver.drivingLicenseStatus == 'verified' || ride.driver.aadharCardStatus == 'verified') && <BadgeCheck
                             className={`${

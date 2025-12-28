@@ -1,4 +1,4 @@
-import { User } from "../models/User";
+import { User } from "../models/User.js";
 
 export const getUsers = async(req, res)=>{
     try{
@@ -8,7 +8,7 @@ export const getUsers = async(req, res)=>{
         });
         console.log("Found Users: ", foundUsers);
 
-        return res.status(200).json({ users: users })
+        return res.status(200).json({ users: foundUsers })
     }catch(e){
         console.log(e);
         return res.status(500).json({ msg: "Internal Server Error" })

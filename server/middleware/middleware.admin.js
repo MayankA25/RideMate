@@ -1,10 +1,12 @@
 export const verifyAdminToken = (req, res, next)=>{
     try{
         const user = req?.session?.passport?.user?.user;
+
+        console.log("User: ", user);
         
         if(!user) return res.status(401).json({ msg: "Unauthorized Admin" })
 
-        const isUserSuperAdmin = user.roles.includes("SuperAdmin");
+        const isUserSuperAdmin = user.role.includes("SuperAdmin");
 
         if(!isUserSuperAdmin) return res.status(401).json({ msg: "Unauthorized Admin" });
 

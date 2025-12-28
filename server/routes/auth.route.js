@@ -44,13 +44,13 @@ authRouter.get(
   callback
 );
 
-authRouter.post("/submitform", submitForm);
+authRouter.post("/submitform", verifyToken, submitForm);
 
 authRouter.put("/updateprofilepic", verifyToken, updateProfilePicture);
 
 authRouter.post("/submitdocument", verifyToken, submitDocument);
 
-authRouter.get("/getspecificuser", getSpecificUser);
+authRouter.get("/getspecificuser",verifyToken, getSpecificUser);
 
 authRouter.post("/logout", verifyToken, logout);
 

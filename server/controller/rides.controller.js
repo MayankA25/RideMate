@@ -423,3 +423,19 @@ export const getBookedRides = async (req, res) => {
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
+
+
+export const getUserRides = async(req, res)=>{
+  const { userId } = req.query;
+  try{
+    const rides = await Ride.find({
+      driver: userId
+    });
+    console.log("Rides: ", rides);
+
+    return res.status(200).json({ rides: rides });
+  }catch(e){
+    console.log(e);
+    return res.status(500).json({ msg:"Internal Server Error" })
+  }
+}

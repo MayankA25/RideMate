@@ -220,7 +220,7 @@ export default function RideInfo() {
               />
               <div className="flex items-center gap-2">
                 <h1 className="font-bold text-2xl">
-                  {selectedRide?.driver.firstName}
+                  {selectedRide?.driver._id == user._id ? "You" : selectedRide?.driver.firstName}
                 </h1>
                 {(selectedRide?.driver.aadharCardStatus == "verified" ||
                   selectedRide?.driver.drivingLicenseStatus == "verified") && (
