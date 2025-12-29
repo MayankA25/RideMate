@@ -7,17 +7,30 @@ export default function UserItem({ specificUser, index }) {
   const navigate = useNavigate();
   return (
     <div className="flex flex-col justify-center bg-base-300 py-5 px-4 gap-4 rounded-xl">
-      <div className="flex items-center justify-between hover:bg-white/5 cursor-pointer transition-all py-5 px-4 rounded-lg" onClick={()=>{
-        navigate(`/account/${specificUser._id}`)
-      }}>
+      <UserDocumentOpenModal
+        id={`${index}_1`}
+        documentObject={{ aadharCard: specificUser.aadharCard }}
+        documentStatus={specificUser.aadharCardStatus}
+        userId={specificUser._id}
+      />
+      <UserDocumentOpenModal
+        id={`${index}_2`}
+        documentObject={{ drivingLicense: specificUser.driverLicense }}
+        documentStatus={specificUser.drivingLicenseStatus}
+        userId={specificUser._id}
+      />
+      <div
+        className="flex items-center justify-between hover:bg-white/5 cursor-pointer transition-all py-5 px-4 rounded-lg"
+        onClick={() => {
+          navigate(`/account/${specificUser._id}`);
+        }}
+      >
         <div className="flex items-center gap-3">
           <img
             src={specificUser.profilePic}
             alt=""
             className="rounded-full w-10"
           />
-          <UserDocumentOpenModal id={`${index}_1`} documentObject={{ aadharCard: "" }} />
-          <UserDocumentOpenModal id={`${index}_2`} documentObject={{ drivingLicense: "" }} />
           <div className="flex items-center gap-1.5">
             <h1 className="font-bold text-lg">{specificUser.firstName}</h1>
             {specificUser.aadharCardStatus == "verified" ||
@@ -40,9 +53,50 @@ export default function UserItem({ specificUser, index }) {
         </div>
         <ChevronRight />
       </div>
-      <div className="grid grid-cols-4 gap-3">
-        <button className="btn btn-primary font-bold" onClick={()=>{ document.getElementById(`my_user_open_doc_modal_${index}_1`).showModal() }}>Aadhar Card</button>
-        <button className="btn btn-primary font-bold">Driving License</button>
+      <div
+        className={`grid ${
+          (specificUser.aadharCardStatus == "under review" ||
+            specificUser.aadharCardStatus == "verified" ||
+            specificUser.drivingLicense == "under review" ||
+            specificUser.drivingLicenseStatus == "verified") &&
+          "grid-cols-3"
+        } ${
+          (specificUser.aadharCardStatus == "under review" ||
+            specificUser.aadharCardStatus == "verified") &&
+          (specificUser.drivingLicenseStatus == "under review" ||
+            specificUser.drivingLicenseStatus == "verified") &&
+          "grid-cols-4"
+        } ${
+          !(
+            specificUser.aadharCardStatus == "under review" ||
+            specificUser.aadharCardStatus == "verified"
+          ) &&
+          !(
+            specificUser.drivingLicenseStatus == "under review" ||
+            specificUser.drivingLicenseStatus == "verified"
+          ) &&
+          "grid-cols-2"
+        } gap-3`}
+      >
+        {(specificUser.aadharCardStatus == "under review" ||
+          specificUser.aadharCardStatus == "verified") && (
+          <button
+            className="btn btn-primary font-bold"
+            onClick={() => {
+              document
+                .getElementById(`my_user_open_doc_modal_${index}_1`)
+                .showModal();
+            }}
+          >
+            Aadhar Card
+          </button>
+        )}
+        {(specificUser.drivingLicenseStatus == "under review" ||
+          specificUser.drivingLicenseStatus == "verified") && (
+          <button className="btn btn-primary font-bold" onClick={()=>{
+            document.getElementById(`my_user_open_doc_modal_${index}_2`).showModal()
+          }}>Driving License</button>
+        )}
         <button className="btn btn-primary font-bold">Show Rides</button>
         <button className="btn btn-error text-white font-bold">Remove</button>
       </div>

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
+import { useUserStore } from "./useUserStore";
 
 
 export const useRequestStore = create((set, get)=>({
@@ -20,6 +21,7 @@ export const useRequestStore = create((set, get)=>({
 
     approveRequest: async(userId, documentName)=>{
         console.log("User ID: ", userId);
+        const { updateSpecificUser } = useUserStore.getState()
         try{
             const tempReq = [...get().requests];
             const foundIndex = tempReq.findIndex((req, index)=>req.userId._id == userId);
@@ -31,6 +33,7 @@ export const useRequestStore = create((set, get)=>({
                 documentName: documentName
             });
             console.log(response.data);
+            updateSpecificUser(userId, documentName, 'verified');
             toast.success(response.data.msg)
 
         }catch(e){
@@ -40,6 +43,7 @@ export const useRequestStore = create((set, get)=>({
     },
 
     rejectRequest: async(userId, documentName)=>{
+        const { updateSpecificUser } = useUserStore.getState();
         try{
             const tempReq = [...get().requests];
             const foundIndex = tempReq.findIndex((req, index)=>req.userId._id == userId);
@@ -54,7 +58,8 @@ export const useRequestStore = create((set, get)=>({
                 userId: userId,
                 documentName: documentName
             });
-            console.log(response.data)
+            console.log(response.data);
+            updateSpecificUser(userId, documentName, 'not verified');
             toast.success(response.data.msg)
         }catch(e){
             console.log(e);
