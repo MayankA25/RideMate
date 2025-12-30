@@ -13,7 +13,7 @@ import React, { useRef } from "react";
 import { useState } from "react";
 import MoreInfo from "../MoreInfo/MoreInfo";
 import toast from "react-hot-toast";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import useChatStore from "../../store/useChatStore";
 import EditMessageModal from "../EditMessageModal/EditMessageModal";
@@ -23,6 +23,8 @@ import DeleteMessageModal from "../DeleteMessageModal/DeleteMessageModal";
 export default function MessageBox({ message, number, sender, index }) {
   const [hover, setHover] = useState(false);
 
+  const navigate = useNavigate();
+
   const params = useParams();
 
   console.log("Ride Id: ", params.id);
@@ -31,6 +33,7 @@ export default function MessageBox({ message, number, sender, index }) {
     setReplyToMessage,
     setSelectedReplyMessageIndex,
     selectedReplyMessageIndex,
+    messages
   } = useChatStore();
   const { user } = useAuthStore();
 
@@ -40,7 +43,16 @@ export default function MessageBox({ message, number, sender, index }) {
         behavior: "smooth"
       });
     }
-  }, [selectedReplyMessageIndex])
+  }, [selectedReplyMessageIndex]);
+
+  const checkIfSenderIsNull = (messageId)=>{
+    const tempMessages = [...messages];
+    const foundIndex = tempMessages.findIndex((message, index)=>{
+      return message._id == messageId
+    })
+
+    return tempMessages[foundIndex].sender;
+  }
 
   return (
     <div
@@ -61,15 +73,22 @@ export default function MessageBox({ message, number, sender, index }) {
         } transition-all duration-300`}
       ></div>
       <div className="chat-image avatar">
-        <div className="w-10 rounded-full">
-          <img
+        <div className="w-10 rounded-full cursor-pointer" onClick={()=>{
+          if(!message.sender) return;
+          navigate(`/account/${message.sender._id}`)
+        }}>
+          {sender != "Deleted User" ? (<img
             alt="Tailwind CSS chat bubble component"
             src={sender.profilePic}
-          />
+          />) : (
+            <div className="flex items-center justify-center rounded-full bg-gray-500 h-full">
+              <span className="font-bold">D</span>
+            </div>
+          )}
         </div>
       </div>
       <div className="chat-header mb-1">
-        {sender.firstName} {sender.lastName}
+        {sender != "Deleted User" ? `${sender.firstName} ${sender.lastName}` : sender}
         <time className="text-xs opacity-50">
           {`${new Date(message.createdAt).getHours()}`.padStart(2, "0")}:
           {`${new Date(message.createdAt).getMinutes()}`.padStart(2, "0")}
@@ -104,9 +123,9 @@ export default function MessageBox({ message, number, sender, index }) {
                       number % 2 != 0 ? "" : "text-indigo-300"
                     }`}
                   >
-                    {message.parentId.sender == user._id
+                    {(message.parentSenderName != [...Array(24)].map(()=>"d").join('') && checkIfSenderIsNull(message.parentId._id)) ? (message.parentId.sender == user._id
                       ? "You"
-                      : message.parentSenderName}
+                      : message.parentSenderName) : "Deleted User"}
                   </h1>
                   <h1
                     className={`font-bold ${
@@ -151,7 +170,7 @@ export default function MessageBox({ message, number, sender, index }) {
             tabIndex="-1"
             className="dropdown-content menu bg-base-200 rounded-box w-52 p-2 shadow-sm"
           >
-            <li
+            {message.sender && <li
               onClick={() => {
                 setReplyToMessage(message);
               }}
@@ -160,7 +179,7 @@ export default function MessageBox({ message, number, sender, index }) {
                 <Reply className="size-4" />
                 Reply
               </a>
-            </li>
+            </li>}
             <li
               onClick={(e) => {
                 navigator.clipboard.writeText(message.text);

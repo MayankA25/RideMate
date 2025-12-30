@@ -60,6 +60,6 @@ const userSchema = new Schema({
         type: String,
         enums: ["Male", "Female", "Other"]
     }
-});
+}, { timestamps: true });
 
 export const User = mongoose.model("User", userSchema);

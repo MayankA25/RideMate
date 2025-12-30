@@ -8,12 +8,14 @@ import { useUserStore } from "./useUserStore";
 export const useRequestStore = create((set, get)=>({
     requests: [],
 
+    requestsCopy: [],
+
 
     getRequests: async()=>{
         try{
             const response = await axiosInstance.get("/requests/getallrequests");
             console.log("Requests: ", response.data.requests);
-            set({ requests: response.data.requests })
+            set({ requests: response.data.requests, requestsCopy: response.data.requests })
         }catch(e){
             console.log(e);
         }
@@ -65,5 +67,18 @@ export const useRequestStore = create((set, get)=>({
             console.log(e);
             toast.error("Error While Approving Document")
         }
+    },
+
+    filterRequests: (val)=>{
+        if(val.trim().length == 0){
+            set({ requests: get().requestsCopy });
+            return;
+        }
+
+        const filteredRequests = get().requestsCopy.filter((request, index)=>{
+            return (request.userId.firstName.startsWith(val) || request.userId.lastName.startsWith(val) || request.userId.email.startsWith(val))
+        });
+
+        set({ requests: filteredRequests });
     }
 }))

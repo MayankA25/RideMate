@@ -2,6 +2,7 @@ import { Ride } from "../models/Rides.js";
 import { getEstimatedTimeOfArrival } from "../utils/routing.js";
 import { Group } from "../models/Group.js";
 import { mailQueue } from "../utils/queue.js";
+import { Message } from "../models/Message.js";
 
 export const getAllRides = async (req, res) => {
   const { pickup, destination, departureDate } = req.query;
@@ -382,6 +383,52 @@ export const cancelRide = async (req, res) => {
 
     console.log("Updated Group: ", updatedGroup);
 
+    // const groupMessages = await Message.find({
+    //   $and: [
+    //     { sender: userId },
+    //     { group: updatedGroup._id }
+    //   ]
+    // });
+
+    // groupMessages.forEach(async(message, index)=>{
+    //   await Message.findByIdAndUpdate(message._id, {
+    //     sender: [...Array(24)].map(()=>"d").join('')
+    //   })
+    //   const parentMessages = await Message.find({ 
+    //     parentId: message._id
+    //    });
+    //    console.log("Parent Messages: ", parentMessages);
+    //    parentMessages.forEach(async(pMessage, index)=>{
+    //     await Message.findByIdAndUpdate(pMessage._id, {
+    //       parentSenderName: [...Array(24)].map(()=>"d").join('')
+    //     })
+    //    })
+
+    
+    const parentIds = await Message.distinct("_id", {
+      sender: userId,
+      group: updatedGroup._id
+    });
+
+    console.log("Parent Ids: ", parentIds);
+
+    await Promise.all([
+
+      // In the first condition i am find the documents using "$in" which checks whether document id is present in an array or not
+
+      // In the second part i am updating sender
+      Message.updateMany(
+        { _id: { $in: parentIds } },
+        { sender: "d".repeat(24) }
+      ),
+
+      // Now same in the first part i am filtering the messages which are present in the parentIds array and in second part i am updating the parentSenderName
+      Message.updateMany(
+        { parentId: { $in: parentIds } },
+        { parentSenderName: "d".repeat(24) }
+      )
+    ])
+
     return res
       .status(200)
       .json({ msg: "Ride cancelled successfully", ride: updatedRide });
@@ -430,12 +477,80 @@ export const getUserRides = async(req, res)=>{
   try{
     const rides = await Ride.find({
       driver: userId
-    });
+    }).populate('driver').populate('passengers').populate('group');
     console.log("Rides: ", rides);
 
     return res.status(200).json({ rides: rides });
   }catch(e){
     console.log(e);
     return res.status(500).json({ msg:"Internal Server Error" })
+  }
+}
+
+
+export const removeRide = async(req, res)=>{
+  const { rideId } = req.query;
+
+  try{
+    const foundRide = await Ride.findById(rideId).populate('driver').populate('passengers').populate('group');
+
+
+    if(!foundRide) throw new Error("Ride Not Found")
+
+
+    await Message.deleteMany(
+      { group: foundRide.group._id }
+    )
+    const deletedGroup = await Group.findByIdAndDelete(foundRide.group._id);
+    console.log("Deleted Group: ", deletedGroup);
+
+    const removedRide = await Ride.findByIdAndDelete(rideId).populate('driver').populate('passengers').populate('group');
+    console.log("Removed Ride: ", removedRide);
+
+
+    // const groupMessages = await Message.find({ group: removedRide.group._id });
+
+    // groupMessages.forEach(async(message, index)=>{
+    //   await Message.findByIdAndDelete(message._id);
+    // })
+
+
+    console.log("Deleted Messages.");
+
+    const senderMail = req.session.passport.user.user.email;
+    const accessToken = req.session.passport.user.accessToken;
+    const refreshToken = req.session.passport.user.refreshToken;
+    const cc = [];
+    const bcc = [];
+    const subject = `Regarding your ride booking from ${removedRide.pickup.address} to ${removedRide.destination.address} scheduled on ${new Date(removedRide.departureDate).toDateString()}`;
+    const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${removedRide.pickup.address}</span> to <span style="font-weight:700">${removedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(removedRide.departureDate).toDateString()}</span> which was assigned to ${removedRide.driver.firstName} ${removedRide.driver.lastName}(${removedRide.driver.email}), has been deleted by the admin(${senderMail}) and is no longer available on the RideMate</span>.
+    <br><br>
+    <br></br>
+    Kindly refer to other rides available on RideMate.
+    <br><br>
+    <br></br>
+    Sorry for the inconvenience caused
+    </span>`;
+    if(removedRide.passengers.length > 0){
+      removedRide.passengers.forEach(async(passenger, index)=>{
+        await mailQueue.add('mailQueue', {
+          senderMail,
+          recipient: passenger.email,
+          accessToken,
+          refreshToken,
+          subject,
+          message,
+          cc,
+          bcc,
+          attachment: []
+        })
+      })
+    }
+    
+    return res.status(200).json({ msg: "Ride Removed Successfully" })
+
+  }catch(e){
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server Error" })
   }
 }

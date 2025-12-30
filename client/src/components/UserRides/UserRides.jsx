@@ -1,32 +1,19 @@
-import {
-  ArrowLeft,
-  BadgeCheck,
-  ChevronRight,
-  PenBox,
-  User,
-  X,
-} from "lucide-react";
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useRideStore } from "../../store/userRideStore";
-import { useEffect } from "react";
-import { useSuggestionStore } from "../../store/useSuggestionStore";
-import RideBookingConfirmation from "../RideBookingConfirmation/RideBookingConfirmation";
-import RideCard from "../RideCard/RideCard";
+import { ArrowLeft } from 'lucide-react';
+import React, { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom';
+import RideCard from '../RideCard/RideCard';
+import { useUserStore } from '../../store/useUserStore';
 
-export default function Rides() {
-  const navigate = useNavigate();
-  const { rides, getAllRides, joinRide, checkIfUserIsPassenger, joining } =
-    useRideStore();
+export default function UserRides() {
+    const navigate = useNavigate();
 
-  const { infoFilled, setInfoFilled } = useSuggestionStore();
+    const { getUserRides, userRides } = useUserStore();
 
-  useEffect(() => {
-    if (!infoFilled) {
-      navigate("/dashboard/search");
-    }
-  }, []);
+    const params = useParams();
 
+    useEffect(()=>{
+        getUserRides(params.id);
+    }, [])
   return (
     <div className="w-[78%] h-full m-auto">
       <div className="flex flex-col py-10 gap-5">
@@ -35,13 +22,11 @@ export default function Rides() {
             className="flex items-center transition-all cursor-pointer hover:bg-base-300 p-2 rounded-full"
             onClick={() => {
               navigate(-1);
-              setInfoFilled(false);
-              
             }}
           >
             <ArrowLeft className="size-5" />
           </span>
-          <h1 className="font-bold text-xl">Rides</h1>
+          <h1 className="font-bold text-xl">User Rides</h1>
         </div>
         <hr className="text-white/15" />
         <div className="flex flex-col justify-center gap-10">
@@ -50,11 +35,11 @@ export default function Rides() {
           </div> */}
           <div className="flex items-center justify-between">
             <h1 className="font-bold text-xl">
-              Available Rides({rides.length})
+              Available Rides({userRides.length})
             </h1>
           </div>
           <div className="flex flex-col gap-5">
-            {rides.map((ride, index) => {
+            {userRides.map((ride, index) => {
               return (
                 <RideCard key={index} ride={ride} index={index} />
               );
@@ -63,5 +48,5 @@ export default function Rides() {
         </div>
       </div>
     </div>
-  );
+  )
 }

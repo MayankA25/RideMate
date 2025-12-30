@@ -220,7 +220,7 @@ export default function RideInfo() {
               />
               <div className="flex items-center gap-2">
                 <h1 className="font-bold text-2xl">
-                  {selectedRide?.driver._id == user._id ? "You" : selectedRide?.driver.firstName}
+                  {selectedRide?.driver._id == user?._id ? "You" : selectedRide?.driver.firstName}
                 </h1>
                 {(selectedRide?.driver.aadharCardStatus == "verified" ||
                   selectedRide?.driver.drivingLicenseStatus == "verified") && (
@@ -321,7 +321,7 @@ export default function RideInfo() {
         {user && user?._id != selectedRide?.driver?._id && (
           <div className="flex items-center justify-center sticky bottom-0 w-[100vw] transform -translate-x-[11%]">
             <button
-              disabled={!authenticated || checkIfUserIsPassenger(selectedRide)}
+              disabled={selectedRide?.passengers.length >=selectedRide?.availableSeats || !authenticated || checkIfUserIsPassenger(selectedRide)}
               className="btn btn-primary w-full py-8 text-xl"
               onClick={() => {
                 document
@@ -329,7 +329,7 @@ export default function RideInfo() {
                   .showModal();
               }}
             >
-              {checkIfUserIsPassenger(selectedRide) ? "Track Ride" : "Book Now"}
+              {selectedRide?.passengers.length >= selectedRide?.availableSeats ? "Full" : (checkIfUserIsPassenger(selectedRide) ? "Track Ride" : "Book Now")}
             </button>
           </div>
         )}

@@ -12,6 +12,7 @@ const useChatStore = create((set, get)=>({
     online: -1,
 
     selectedGroup: {},
+    gettingGroup: false,
 
     replyToMessage: null,
 
@@ -49,6 +50,7 @@ const useChatStore = create((set, get)=>({
 
     getSelectedGroup: async(groupId)=>{
         try{
+            set({ gettingGroup: true })
             const response = await axiosInstance.get("/group/getgroup", {
                 params: {
                     groupId: groupId
@@ -58,6 +60,8 @@ const useChatStore = create((set, get)=>({
             set({ selectedGroup: response.data.group });
         }catch(e){
             console.log(e);
+        }finally{
+            set({ gettingGroup: false });
         }
     },
 

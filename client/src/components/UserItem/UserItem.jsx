@@ -33,8 +33,8 @@ export default function UserItem({ specificUser, index }) {
           />
           <div className="flex items-center gap-1.5">
             <h1 className="font-bold text-lg">{specificUser.firstName}</h1>
-            {specificUser.aadharCardStatus == "verified" ||
-              (specificUser.drivingLicenseStatus == "verified" && (
+            {(specificUser.aadharCardStatus == "verified" ||
+              specificUser.drivingLicenseStatus == "verified") && (
                 <BadgeCheck
                   className={`${
                     ((specificUser.aadharCardStatus == "verified" &&
@@ -48,7 +48,7 @@ export default function UserItem({ specificUser, index }) {
                     "text-green-300"
                   }`}
                 />
-              ))}
+              )}
           </div>
         </div>
         <ChevronRight />
@@ -97,7 +97,9 @@ export default function UserItem({ specificUser, index }) {
             document.getElementById(`my_user_open_doc_modal_${index}_2`).showModal()
           }}>Driving License</button>
         )}
-        <button className="btn btn-primary font-bold">Show Rides</button>
+        <button className="btn btn-primary font-bold" onClick={()=>{
+          navigate(`/dashboard/users/rides/${specificUser._id}`)
+        }}>Show Rides</button>
         <button className="btn btn-error text-white font-bold">Remove</button>
       </div>
     </div>

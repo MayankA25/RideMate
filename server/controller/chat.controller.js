@@ -81,14 +81,14 @@ export const replyToMessage = async(req, res)=>{
     const { senderId, groupId, text, parentId, rideId } = req.body;
     try{
 
-        const foundSender = await User.findById(senderId);
+        const foundMessage = await Message.findById(parentId).populate('sender').populate('group').populate('parentId');
 
         const newMessage = new Message({
             sender: senderId,
             group: groupId,
             text: text,
             parentId: parentId,
-            parentSenderName: `${foundSender.firstName} ${foundSender.lastName}`
+            parentSenderName: `${foundMessage.sender.firstName} ${foundMessage.sender.lastName}`
         });
 
         const savedReply = await newMessage.save();

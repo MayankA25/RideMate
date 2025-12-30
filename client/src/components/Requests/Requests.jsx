@@ -3,7 +3,7 @@ import { useRequestStore } from "../../store/useRequestStore";
 import { useEffect } from "react";
 
 export default function Documents() {
-  const { getRequests, requests, approveRequest, rejectRequest } = useRequestStore();
+  const { getRequests, requests, approveRequest, rejectRequest, filterRequests } = useRequestStore();
   useEffect(() => {
     getRequests();
   }, []);
@@ -17,6 +17,9 @@ export default function Documents() {
                 type="text"
                 className="w-[85%] m-auto input input-primary focus:outline-0"
                 placeholder="Search Requests By Name/Email"
+                onChange={(e)=>{
+                  filterRequests(e.target.value.trim().toLowerCase())
+                }}
               />
             </div>
             <div className="flex flex-col justify-center gap-5">
