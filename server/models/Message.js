@@ -22,6 +22,16 @@ const messageSchema = new Schema({
         type: String
     },
 
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+
+    deletedAt: {
+        type: Date,
+        default: null
+    },
+    
     text: {
         type: String,
         required: true

@@ -198,6 +198,7 @@ export default function SearchRide() {
             className="input input-primary w-full focus:outline-0"
             value={searchDetails.departureDate}
             onChange={(e) => {
+              if(new Date(e.target.value).getTime() < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0).getTime()) return toast.error("Invalid Departure Date")
               setSearchDetails({ departureDate: e.target.value });
             }}
           />

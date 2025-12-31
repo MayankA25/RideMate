@@ -161,8 +161,8 @@ export default function Bookings() {
                           <h1 className="font-bold text-lg">
                             {ride.driver.firstName}
                           </h1>
-                          {ride.driver.aadharCardStatus == "verified" ||
-                            (ride.driver.drivingLicenseStatus == "verified" && (
+                          {(ride.driver.aadharCardStatus == "verified" ||
+                            ride.driver.drivingLicenseStatus == "verified") && (
                               <BadgeCheck
                                 className={`${
                                   ((ride.driver.aadharCardStatus ==
@@ -181,7 +181,7 @@ export default function Bookings() {
                                   "text-green-300"
                                 }`}
                               />
-                            ))}
+                            )}
                         </div>
                       </div>
                       <div className="flex items-center justify-center">

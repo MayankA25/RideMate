@@ -76,7 +76,7 @@ export const useRequestStore = create((set, get)=>({
         }
 
         const filteredRequests = get().requestsCopy.filter((request, index)=>{
-            return (request.userId.firstName.startsWith(val) || request.userId.lastName.startsWith(val) || request.userId.email.startsWith(val))
+            return (request.userId.firstName.toLowerCase().startsWith(val) || request.userId.lastName.toLowerCase().startsWith(val) || request.userId.email.toLowerCase().startsWith(val))
         });
 
         set({ requests: filteredRequests });

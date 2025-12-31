@@ -28,7 +28,7 @@ export default function User() {
         <hr className="opacity-25" />
         <div className="flex flex-col justify-center gap-8">
           <input type="text" className="input input-primary focus:ouline-0 w-full" placeholder="Search By Name" onChange={(e)=>{
-            filterUsers(e.target.value.toLowerCase().trim())
+            filterUsers(e.target.value.trim().toLowerCase())
           }} />
           <div className="flex flex-col justify-center gap-3">
             {allUsers.map((user, index) => {

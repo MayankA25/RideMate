@@ -270,6 +270,9 @@ export default function AddRideModal({ index, id }) {
               placeholder="Enter Destination"
               value={rideDetails.departureDate}
               onChange={(e) => {
+                if(new Date(e.target.value) <= new Date().getTime()){
+                  return toast.error("Invalid Departure Date")
+                }
                 setRideDetails({
                   departureDate: getFormattedDate(
                     new Date(e.target.value).toISOString()

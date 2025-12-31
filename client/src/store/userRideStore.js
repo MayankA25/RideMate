@@ -128,7 +128,7 @@ export const useRideStore = create((set, get) => ({
       );
       tempRides.splice(foundIndex, 1);
       set({ driverRides: tempRides });
-      const response = await axiosInstance.delete("/rides/deleteride", {
+      const response = await axiosInstance.delete("/rides/removeride", {
         params: {
           rideId: rideId,
         },

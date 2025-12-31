@@ -3,6 +3,7 @@ import {
   Copy,
   Dot,
   Ellipsis,
+  MessageCircleOff,
   Pen,
   Reply,
   ReplyAll,
@@ -80,6 +81,7 @@ export default function MessageBox({ message, number, sender, index }) {
           {sender != "Deleted User" ? (<img
             alt="Tailwind CSS chat bubble component"
             src={sender.profilePic}
+            className={`${message.isDeleted ? "grayscale-100" : ""}`}
           />) : (
             <div className="flex items-center justify-center rounded-full bg-gray-500 h-full">
               <span className="font-bold">D</span>
@@ -101,7 +103,7 @@ export default function MessageBox({ message, number, sender, index }) {
       >
         <div
           className={`chat-bubble ${
-            number % 2 != 0 ? "chat-bubble-primary" : ""
+            number % 2 != 0 ? (message.isDeleted ? "bg-neutral-600" : "chat-bubble-primary") : (message.isDeleted ? "bg-gray-600" : "")
           }`}
         >
           <div className="flex flex-col justify-center gap-3">
@@ -120,10 +122,10 @@ export default function MessageBox({ message, number, sender, index }) {
                 <div className="flex flex-col justify-center mx-4 gap-2">
                   <h1
                     className={`font-bold text-shadow-lg ${
-                      number % 2 != 0 ? "" : "text-indigo-300"
+                      number % 2 != 0 ? `${message.parentId.isDeleted ? "text-neutral-300" : ""}` : `${message.parentId.isDeleted ? "text-neutral-300" : "text-indigo-300" }`
                     }`}
                   >
-                    {(message.parentSenderName != [...Array(24)].map(()=>"d").join('') && checkIfSenderIsNull(message.parentId._id)) ? (message.parentId.sender == user._id
+                    {(!!message.parentSenderName && checkIfSenderIsNull(message.parentId._id)) ? (message.parentId.sender == user._id
                       ? "You"
                       : message.parentSenderName) : "Deleted User"}
                   </h1>
@@ -137,12 +139,12 @@ export default function MessageBox({ message, number, sender, index }) {
                 </div>
                 <div
                   className={`flex h-full absolute ${
-                    number % 2 != 0 ? "bg-neutral/80" : "bg-indigo-500"
+                    (number % 2 != 0 ? `${message.parentId.isDeleted ? "bg-white/60" : "bg-neutral/80"}` : `${message.parentId.isDeleted ? "bg-neutral-600" : "bg-indigo-500"}`)
                   } p-1 rounded-l-lg left-0`}
                 ></div>
               </div>
             )}
-            <h1 className="font-bold">{message.text}</h1>
+            <h1 className="font-bold">{message.isDeleted ? <span className="flex items-center gap-3"><MessageCircleOff strokeWidth={4}/> {`This Message Was Deleted`}</span> : <span>{message.text}</span>}</h1>
           </div>
         </div>
         <EditMessageModal

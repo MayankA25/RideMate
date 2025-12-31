@@ -19,98 +19,163 @@ export const getUsers = async (req, res) => {
   }
 };
 
-export const removeUser = async (req, res) => {
+// export const removeUser = async (req, res) => {
+//   const { userId } = req.query;
+//   try {
+//     const deletedUser = await User.findByIdAndDelete(userId);
+//     const foundDriverRides = await Ride.find({ driver: deletedUser._id })
+//       .populate("driver")
+//       .populate("passengers")
+//       .populate("group");
+
+//     const senderMail = req.session.passport.user.user.email;
+//     const accessToken = req.session.passport.user.accessToken;
+//     const refreshToken = req.session.passport.user.refreshToken;
+//     const cc = [];
+//     const bcc = [];
+//     const subject = `Regarding your ride booking from ${
+//       removedRide.pickup.address
+//     } to ${removedRide.destination.address} scheduled on ${new Date(
+//       removedRide.departureDate
+//     ).toDateString()}`;
+//     const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${
+//       deletedRide.pickup.address
+//     }</span> to <span style="font-weight:700">${
+//       deletedRide.destination.address
+//     }</span> scheduled on <span style="font-weight:700">${new Date(
+//       removedRide.departureDate
+//     ).toDateString()}</span> which was assigned to ${
+//       removedRide.driver.firstName
+//     } ${removedRide.driver.lastName}(${
+//       removedRide.driver.email
+//     }), has been deleted by the admin(${senderMail}) and is no longer available on the RideMate</span>.
+//     <br><br>
+//     <br></br>
+//     Kindly refer to other rides available on RideMate.
+//     <br><br>
+//     <br></br>
+//     Sorry for the inconvenience caused
+//     </span>`;
+
+//     foundDriverRides.forEach(async (ride, index) => {
+//       await Ride.findByIdAndDelete(ride._id);
+//       ride.passengers.forEach(async (passenger, index) => {
+//         await mailQueue.add("mailQueue", {
+//           senderMail,
+//           recipient: passenger.email,
+//           accessToken,
+//           refreshToken,
+//           subject,
+//           message,
+//           cc,
+//           bcc,
+//           attachment: [],
+//         });
+//       });
+//       await Group.findByIdAndDelete(ride.group._id);
+
+//       const groupMessages = await Message.find({ group: ride.group._id });
+
+//       groupMessages.forEach(async (message, index)=>{
+//         await Message.findByIdAndDelete(message._id);
+//       })
+//     });
+
+//     const foundPassengerRides = await Ride.find({ passengers: userId })
+//       .populate("driver")
+//       .populate("passengers")
+//       .populate("group");
+
+//     foundPassengerRides.forEach(async (ride, index) => {
+//       await Ride.findByIdAndUpdate(ride._id, {
+//         $pull: { passengers: userId },
+//       });
+//       await Group.findByIdAndUpdate(ride.group._id, {
+//         $pull: { members: userId },
+//       });
+
+//       const userSentMessages = await Message.find({
+//         $and: [
+//             { sender: userId },
+//             { group: ride.group._id }
+//         ]
+//       });
+
+//       userSentMessages.forEach(async(message, index)=>{
+//         Message.findByIdAndUpdate(message._id, {
+//             sender: [...Array(24)].map(()=>"d").join('')
+//         })
+//       })
+//     });
+
+//     return res.status(200).json({ msg: "User Deleted Successfully" });
+//   } catch (e) {
+//     console.log(e);
+//     return res.status(500).json({ msg: "Internal Server Error" });
+//   }
+// };
+
+
+export const removeUser = async(req, res)=>{
   const { userId } = req.query;
-  try {
-    const deletedUser = await User.findByIdAndDelete(userId);
-    const foundDriverRides = await Ride.find({ driver: deletedUser._id })
-      .populate("driver")
-      .populate("passengers")
-      .populate("group");
+  try{
+    const foundUser = await User.findById(userId);
+    if(!foundUser) throw new Error("User Not Found");
 
-    const senderMail = req.session.passport.user.user.email;
-    const accessToken = req.session.passport.user.accessToken;
-    const refreshToken = req.session.passport.user.refreshToken;
-    const cc = [];
-    const bcc = [];
-    const subject = `Regarding your ride booking from ${
-      removedRide.pickup.address
-    } to ${removedRide.destination.address} scheduled on ${new Date(
-      removedRide.departureDate
-    ).toDateString()}`;
-    const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${
-      deletedRide.pickup.address
-    }</span> to <span style="font-weight:700">${
-      deletedRide.destination.address
-    }</span> scheduled on <span style="font-weight:700">${new Date(
-      removedRide.departureDate
-    ).toDateString()}</span> which was assigned to ${
-      removedRide.driver.firstName
-    } ${removedRide.driver.lastName}(${
-      removedRide.driver.email
-    }), has been deleted by the admin(${senderMail}) and is no longer available on the RideMate</span>.
-    <br><br>
-    <br></br>
-    Kindly refer to other rides available on RideMate.
-    <br><br>
-    <br></br>
-    Sorry for the inconvenience caused
-    </span>`;
+    // Case-1: The User Is Driver
 
-    foundDriverRides.forEach(async (ride, index) => {
-      await Ride.findByIdAndDelete(ride._id);
-      ride.passengers.forEach(async (passenger, index) => {
-        await mailQueue.add("mailQueue", {
-          senderMail,
-          recipient: passenger.email,
-          accessToken,
-          refreshToken,
-          subject,
-          message,
-          cc,
-          bcc,
-          attachment: [],
-        });
-      });
-      await Group.findByIdAndDelete(ride.group._id);
-
-      const groupMessages = await Message.find({ group: ride.group._id });
-
-      groupMessages.forEach(async (message, index)=>{
-        await Message.findByIdAndDelete(message._id);
-      })
+    const groupIds = await Ride.distinct('group', {
+      driver: userId
     });
 
-    const foundPassengerRides = await Ride.find({ passengers: userId })
-      .populate("driver")
-      .populate("passengers")
-      .populate("group");
+    console.log("Group Ids: ", groupIds);
 
-    foundPassengerRides.forEach(async (ride, index) => {
-      await Ride.findByIdAndUpdate(ride._id, {
-        $pull: { passengers: userId },
-      });
-      await Group.findByIdAndUpdate(ride.group._id, {
-        $pull: { members: userId },
-      });
+    await Promise.all([
+      Message.deleteMany({ group: { $in: groupIds } }),
+      Group.deleteMany({ _id: { $in: groupIds } }),
+      Ride.deleteMany({ sender: userId })
+    ])
 
-      const userSentMessages = await Message.find({
-        $and: [
-            { sender: userId },
-            { group: ride.group._id }
-        ]
-      });
 
-      userSentMessages.forEach(async(message, index)=>{
-        Message.findByIdAndUpdate(message._id, {
-            sender: [...Array(24)].map(()=>"d").join('')
-        })
-      })
-    });
+    // Case-2: The User is Passenger
 
-    return res.status(200).json({ msg: "User Deleted Successfully" });
-  } catch (e) {
+    const passengerGroupIds = await Ride.distinct('group', {
+      passengers: userId
+    })
+
+    console.log("Passenger Group Ids: ", passengerGroupIds);
+
+    await Promise.all([
+      Message.updateMany(
+        {
+          group: { $in: passengerGroupIds }
+        }, 
+        {
+          sender: null
+        }
+      ),
+      Group.updateMany(
+        { 
+          _id: { $in: passengerGroupIds } 
+        },
+        {
+          $pull: { members: userId }
+        }
+      ),
+      Ride.updateMany(
+        {
+          group: { $in: passengerGroupIds }
+        },
+        {
+          $pull: { passengers: userId }
+        }
+      )
+    ])
+  
+    
+
+  }catch(e){
     console.log(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: "Internal Server Error" })
   }
-};
+}

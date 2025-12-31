@@ -76,14 +76,17 @@ export const useUserStore = create((set, get)=>({
     },
 
     filterUsers: (val)=>{
+        console.log("Val: ", val);
         if(val.trim().length == 0){
             set({ allUsers: get().allUsersCopy })
             return;
         }
         const usersCopy = [...get().allUsersCopy];
-
         const filteredUsers = usersCopy.filter((user, index)=>{
-            return (user.firstName.startsWith(val) || user.lastName.startsWith(val) || user.email.startsWith(val))
+            // console.log("First Name: ", user.firstName)
+            // console.log("Last Name: ", user.lastName)
+            // console.log("Email: ", user.email)
+            return (user.firstName.toLowerCase().startsWith(val) || user.lastName.toLowerCase().startsWith(val) || user.email.toLowerCase().startsWith(val))
         })
 
         console.log("Filtered Users: ", filteredUsers);

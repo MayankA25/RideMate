@@ -419,13 +419,13 @@ export const cancelRide = async (req, res) => {
       // In the second part i am updating sender
       Message.updateMany(
         { _id: { $in: parentIds } },
-        { sender: "d".repeat(24) }
+        { sender: null }
       ),
 
       // Now same in the first part i am filtering the messages which are present in the parentIds array and in second part i am updating the parentSenderName
       Message.updateMany(
         { parentId: { $in: parentIds } },
-        { parentSenderName: "d".repeat(24) }
+        { parentSenderName: null }
       )
     ])
 
@@ -497,6 +497,7 @@ export const removeRide = async(req, res)=>{
 
     if(!foundRide) throw new Error("Ride Not Found")
 
+    console.log("Found Ride: ", foundRide);
 
     await Message.deleteMany(
       { group: foundRide.group._id }
@@ -523,7 +524,7 @@ export const removeRide = async(req, res)=>{
     const cc = [];
     const bcc = [];
     const subject = `Regarding your ride booking from ${removedRide.pickup.address} to ${removedRide.destination.address} scheduled on ${new Date(removedRide.departureDate).toDateString()}`;
-    const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${removedRide.pickup.address}</span> to <span style="font-weight:700">${removedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(removedRide.departureDate).toDateString()}</span> which was assigned to ${removedRide.driver.firstName} ${removedRide.driver.lastName}(${removedRide.driver.email}), has been deleted by the admin(${senderMail}) and is no longer available on the RideMate</span>.
+    const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${removedRide.pickup.address}</span> to <span style="font-weight:700">${removedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(removedRide.departureDate).toDateString()}</span> which was assigned to ${removedRide.driver.firstName} ${removedRide.driver.lastName}(${removedRide.driver.email}), has been deleted by the ${foundRide.driver._id == req.session.passport.user.user._id ? "Driver" : "Admin"}(${senderMail}) and is no longer available on the RideMate.</span>.
     <br><br>
     <br></br>
     Kindly refer to other rides available on RideMate.

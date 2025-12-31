@@ -66,10 +66,36 @@ export const deleteMessage = async(req, res)=>{
     const { messageId, rideId } = req.query;
 
     try{
-        await Message.findByIdAndDelete(messageId);
 
-        io.to(rideId).emit("deletedGroupMessageId", messageId);
+        const userId = req.session.passport.user.user._id;
 
+        const foundMessage = await Message.findById(messageId).populate('sender').populate('group');
+
+        if(!foundMessage) return res.status(404).json({ msg: "Message Not Found" });
+
+        if(foundMessage.sender._id != userId) return res.status(401).json({ msg: "Unauthorized Deletion" })
+
+        const isMessageParent = await Message.exists({ parentId: messageId });
+
+        let hardDelete = false;
+        let updatedMessage = {};
+
+        if(!isMessageParent){
+            const deletedMessage = await Message.findByIdAndDelete(messageId);   
+            hardDelete = true;
+            console.log("Hard Delete: ", hardDelete);
+            console.log("Deleted Message: ", deletedMessage);
+        }
+        else if(isMessageParent){
+            const deletedMessage = await Message.findByIdAndUpdate(messageId, {
+                isDeleted: true,
+                deletedAt: Date.now()
+            }, { new: true }).populate('sender').populate('group');
+            updatedMessage = deletedMessage;
+            console.log("Hard Delete: ", hardDelete);
+            console.log("Deleted Messaage: ", deletedMessage);
+        }
+        io.to(rideId).emit("deletedGroupMessageId", {messageId: messageId, hardDelete: hardDelete, updatedMessage: updatedMessage});
         return res.status(200).json({ msg: "Message Deleted Successfully" });
     }catch(e){
         console.log(e);

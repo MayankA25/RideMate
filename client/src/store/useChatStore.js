@@ -167,7 +167,9 @@ const useChatStore = create((set, get)=>({
             set({ messages: messages })
         })
 
-        socket.on("deletedGroupMessageId", (messageId)=>{
+        socket.on("deletedGroupMessageId", (messaageObject)=>{
+            const messageId = messaageObject.messageId;
+            const hardDelete = messaageObject.hardDelete;
             const messages = [...get().messages];
             const foundIndex = messages.findIndex((message, index)=>{
                 return message._id == messageId
@@ -176,11 +178,18 @@ const useChatStore = create((set, get)=>({
             if(foundIndex == -1) return;
             console.log("Found Index: ", foundIndex);
 
-            messages.splice(foundIndex, 1);
+            if(hardDelete){
+                messages.splice(foundIndex, 1);
+            }
+            if(!hardDelete){
+                const updatedMessage = messaageObject.updatedMessage;
+                
+                messages.splice(foundIndex, 1, updatedMessage);
+            }
 
             set({ messages: messages });
 
-            toast.success("Deleted Message Successfully")
+            // toast.success("Deleted Message Successfully")
         })
     },
 
