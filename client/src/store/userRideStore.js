@@ -216,6 +216,8 @@ export const useRideStore = create((set, get) => ({
     // const { selectedRide } = get();
     const { user } = useAuthStore.getState();
 
+    console.log("Ride: ", ride);
+
     const passengers = ride?.passengers;
 
     console.log("Passengers: ", passengers);

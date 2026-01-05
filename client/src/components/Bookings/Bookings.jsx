@@ -14,7 +14,7 @@ import RideBookingConfirmation from "../RideBookingConfirmation/RideBookingConfi
 
 export default function Bookings() {
   const { getBookedRides, bookedRides, cancelling } = useRideStore();
-  const { getSelectedGroup } = useChatStore();
+  const { getSelectedGroup, setSelectedGroup } = useChatStore();
 
   useEffect(() => {
     getBookedRides();
@@ -122,6 +122,7 @@ export default function Bookings() {
                         disabled={cancelling}
                         className="btn btn-primary font-bold flex gap-2"
                         onClick={() => {
+                          setSelectedGroup({});
                           navigate(`/dashboard/chat/${ride._id}`);
                           getSelectedGroup(ride.group._id);
                         }}

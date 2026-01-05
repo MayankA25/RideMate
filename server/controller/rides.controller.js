@@ -319,31 +319,52 @@ export const getRideInfo = async (req, res) => {
 };
 
 export const joinRide = async (req, res) => {
-  const { rideId, userId } = req.body;
+  const { rideId } = req.body;
 
   try {
     const foundRide = await Ride.findById(rideId);
 
-    if (foundRide.passengers.length >= foundRide.availableSeats) {
-      return res.status(400).json({ msg: "Ride capacity is full" });
-    }
+    const userId = req.session.passport.user.user._id;
 
-    const updatedRide = await Ride.findByIdAndUpdate(
-      rideId,
-      { $push: { passengers: userId } },
+    // if (foundRide.passengers.length >= foundRide.availableSeats) {
+    //   return res.status(400).json({ msg: "Ride capacity is full" });
+    // }
+
+    // const updatedRide = await Ride.findByIdAndUpdate(
+    //   rideId,
+    //   { $addToSet: { passengers: userId } },
+    //   { new: true }
+    // )
+    //   .populate("driver")
+    //   .populate("passengers")
+    //   .populate("group");
+
+    const updatedRide = await Ride.findOneAndUpdate(
+      {
+        _id: rideId,
+
+        // $expr ---> lets to calculate so here the first condition is of finding the document which is being finded by the rideId and also the ride which has passengers.length < availableSeats;
+        $expr: {
+          $lt: [ { $size: '$passengers' }, '$availableSeats' ]
+        }
+      },
+      {
+        $addToSet: { passengers: userId }
+      },
       { new: true }
-    )
-      .populate("driver")
-      .populate("passengers")
-      .populate("group");
-
+    ).populate('driver').populate('passengers').populate('group');
+    
+    if(!updatedRide){
+      return res.status(400).json({ msg: "Ride Capacity Is Full" })
+    }
     const updatedGroup = await Group.findByIdAndUpdate(
       updatedRide.group._id,
       {
-        $push: { members: userId },
+        $addToSet: { members: userId },
       },
       { new: true }
     );
+
 
     console.log("Updated Ride: ", updatedRide);
     console.log("Updated Group: ", updatedGroup);

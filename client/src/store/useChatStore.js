@@ -23,6 +23,10 @@ const useChatStore = create((set, get)=>({
         set({ replyToMessage: val })
     },
 
+    setSelectedGroup: (val)=>{
+        set({ selectedGroup: val })
+    },
+
     setSelectedReplyMessageIndex: async(parentId)=>{
         console.log("Parent Id: ", parentId);
         const messages = [...get().messages];
@@ -57,6 +61,7 @@ const useChatStore = create((set, get)=>({
                 }
             });
             console.log("Response: ", response.data);
+            // console.log("Group Id: ", response.data.group);
             set({ selectedGroup: response.data.group });
         }catch(e){
             console.log(e);
@@ -185,6 +190,10 @@ const useChatStore = create((set, get)=>({
                 const updatedMessage = messaageObject.updatedMessage;
                 
                 messages.splice(foundIndex, 1, updatedMessage);
+            }
+
+            if(messageId == get().replyToMessage){
+                set({ replyToMessage: null });
             }
 
             set({ messages: messages });

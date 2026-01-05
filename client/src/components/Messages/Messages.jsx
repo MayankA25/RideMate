@@ -10,7 +10,7 @@ export default function Messages() {
     subscribeToGroupMessages,
     unsubscribeToGroupMessages,
     getMessages,
-    selectedGroup,
+    selectedGroup
   } = useChatStore();
   const { user } = useAuthStore();
 
@@ -24,7 +24,7 @@ export default function Messages() {
   }, []);
 
   useEffect(() => {
-    getMessages(selectedGroup._id);
+    getMessages(selectedGroup?._id);
   }, [selectedGroup]);
 
   useEffect(()=>{

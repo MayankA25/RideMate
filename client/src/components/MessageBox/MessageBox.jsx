@@ -52,7 +52,7 @@ export default function MessageBox({ message, number, sender, index }) {
       return message._id == messageId
     })
 
-    return tempMessages[foundIndex].sender;
+    return !tempMessages[foundIndex]?.sender ? null : tempMessages[foundIndex].sender;
   }
 
   return (
@@ -107,7 +107,7 @@ export default function MessageBox({ message, number, sender, index }) {
           }`}
         >
           <div className="flex flex-col justify-center gap-3">
-            {message.parentId && (
+            {(message.parentId && !message.isDeleted) && (
               <div
                 className={`flex items-center relative ${
                   number % 2 != 0 ? "bg-indigo-400" : "bg-base-100"
@@ -147,17 +147,17 @@ export default function MessageBox({ message, number, sender, index }) {
             <h1 className="font-bold">{message.isDeleted ? <span className="flex items-center gap-3"><MessageCircleOff strokeWidth={4}/> {`This Message Was Deleted`}</span> : <span>{message.text}</span>}</h1>
           </div>
         </div>
-        <EditMessageModal
+        {message.sender && <EditMessageModal
           messageId={message._id}
           messageText={message.text}
           rideId={params.id}
-        />
-        <DeleteMessageModal
+        />}
+        {message.sender && <DeleteMessageModal
           messageId={message._id}
           messageText={message.text}
           rideId={params.id}
-        />
-        <span
+        />}
+        {message.sender && <span
           className={`dropdown ${index < 2 ? "dropdown-bottom" : "dropdown-top"}
           }`}
         >
@@ -222,7 +222,7 @@ export default function MessageBox({ message, number, sender, index }) {
               </li>
             )}
           </ul>
-        </span>
+        </span>}
       </div>
     </div>
   );
