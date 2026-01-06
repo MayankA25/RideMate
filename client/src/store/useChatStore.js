@@ -175,7 +175,7 @@ const useChatStore = create((set, get)=>({
         socket.on("deletedGroupMessageId", (messaageObject)=>{
             const messageId = messaageObject.messageId;
             const hardDelete = messaageObject.hardDelete;
-            const messages = [...get().messages];
+            let messages = [...get().messages];
             const foundIndex = messages.findIndex((message, index)=>{
                 return message._id == messageId
             });
@@ -188,14 +188,24 @@ const useChatStore = create((set, get)=>({
             }
             if(!hardDelete){
                 const updatedMessage = messaageObject.updatedMessage;
-                
+                console.log("Updated Message: ", updatedMessage);
                 messages.splice(foundIndex, 1, updatedMessage);
+                const newMessages = messages.map((message, index)=>{
+                    console.log("Message: ", message);
+                    if(message.parentId && message.parentId._id == messageId){
+                        return { ...message, parentId: { ...message.parentId, isDeleted: true, deletedAt: updatedMessage.deletedAt } }
+                    }
+                    return message
+                });
+                messages = newMessages;
+                console.log("New Messages: ", newMessages);
             }
 
             if(messageId == get().replyToMessage){
                 set({ replyToMessage: null });
             }
 
+            console.log("Updated Messages: ", messages);
             set({ messages: messages });
 
             // toast.success("Deleted Message Successfully")

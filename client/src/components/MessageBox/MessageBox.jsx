@@ -28,7 +28,8 @@ export default function MessageBox({ message, number, sender, index }) {
 
   const params = useParams();
 
-  console.log("Ride Id: ", params.id);
+  // console.log("Ride Id: ", params.id);
+  // console.log("MessageBox: ", message.parentId)
 
   const {
     setReplyToMessage,
@@ -113,6 +114,8 @@ export default function MessageBox({ message, number, sender, index }) {
                   number % 2 != 0 ? "bg-indigo-400" : "bg-base-100"
                 } p-2 rounded-lg cursor-pointer`}
                 onClick={() => {
+                  console.log("Parent Message: ", message.parentId);
+                  if(message.parentId.isDeleted) return;
                   setSelectedReplyMessageIndex(message.parentId._id);
                   setTimeout(() => {
                     setSelectedReplyMessageIndex(null);
@@ -224,6 +227,7 @@ export default function MessageBox({ message, number, sender, index }) {
           </ul>
         </span>}
       </div>
+      {message.isDeleted && <div className="chat-footer">Deleted At: {`${new Date(message.deletedAt).getHours()}:${new Date(message.deletedAt).getMinutes()}`}</div>}
     </div>
   );
 }
