@@ -1,3 +1,4 @@
+import { Group } from "../models/Group.js";
 import { Message } from "../models/Message.js";
 import { User } from "../models/User.js";
 import { io } from "../utils/socket.js";
@@ -5,6 +6,10 @@ import { io } from "../utils/socket.js";
 export const getMessages = async (req, res) => {
   const { groupId } = req.query;
   try {
+    const userId = req.session.passport.user.user._id;
+    const isUserMember = await Group.exists({ _id: groupId, members: userId });
+    console.log("Is User Member: ", isUserMember);
+    if(!isUserMember) return res.status(400).json({ msg: "You are not a passenger of this ride" });
     const messages = await Message.find({ group: groupId })
       .populate("sender")
       .populate("group")

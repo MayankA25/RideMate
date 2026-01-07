@@ -241,4 +241,28 @@ export const useRideStore = create((set, get) => ({
       console.log(e);
     }
   },
+
+  removePassenger: async(rideId, passengerId)=>{
+    const driverRides = [...get().driverRides];
+    try{
+      const response = await axiosInstance.post("/rides/removepassenger", {
+        rideId: rideId,
+        passengerId: passengerId
+      });
+      
+      const foundIndex = driverRides.findIndex((ride, index)=>{
+        return ride._id == rideId;
+      });
+
+      console.log("Found Index: ", foundIndex);
+
+      driverRides.splice(foundIndex, 1, response.data.ride);
+
+      set({ driverRides: driverRides });
+
+      console.log("Response: ", response.data);
+    }catch(e){
+      console.log(e);
+    }
+  }
 }));

@@ -72,6 +72,7 @@ const useChatStore = create((set, get)=>({
 
     getMessages: async(groupId)=>{
         console.log("Group Id: ", groupId);
+        if(!groupId) return;
         try{
             const response = await axiosInstance.get("/chat/getmessages", {
                 params: {

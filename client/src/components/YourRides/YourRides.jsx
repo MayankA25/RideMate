@@ -1,4 +1,4 @@
-import { ArrowLeft, BadgeCheck, ChevronRight, Circle, MessageCircle, Pen, PenBox, Plus, User, X } from "lucide-react";
+import { ArrowLeft, BadgeCheck, ChevronRight, Circle, MessageCircle, Pen, PenBox, Plus, User, User2, X } from "lucide-react";
 import React, { useEffect } from "react";
 import AddRideModal from "../AddRideModal/AddRideModal";
 import { useRideStore } from "../../store/userRideStore";
@@ -8,6 +8,7 @@ import { getFormattedDate } from "../../../utils/date";
 import useChatStore from "../../store/useChatStore";
 import DeleteRideConfirmation from "../DeleteRideConfirmation/DeleteRideConfirmation";
 import { useAuthStore } from "../../store/useAuthStore";
+import PassengersModal from "../PassengersModal/PassengersModal";
 
 export default function YourRides() {
   const { getDriverRides, driverRides, setEdit } = useRideStore();
@@ -61,6 +62,7 @@ export default function YourRides() {
                 >
                   <AddRideModal index={index} id={ride._id} />
                   <DeleteRideConfirmation index={index} rideId={ride._id} pickup={ride.pickup.address} destination={ride.destination.address} departureDate={new Date(ride.departureDate).toDateString()}/>
+                  <PassengersModal rideId={ride._id} index={index} passengers={ride.passengers}/>
                   <div className="grid grid-cols-4 w-full">
                     <div className="flex items-center p-5 py-8 gap-10 pl-15 cursor-pointer" onClick={()=>{navigate(`/info/rides/${ride._id}`)}}>
                       {/* <div className="grid grid-cols-1 gap-8">
@@ -100,6 +102,7 @@ export default function YourRides() {
                       }}><MessageCircle className="size-5"/>Go To Chat</button>
                       {/* <button className="btn btn-primary font-bold"><User className="size-5"/> Show Passengers</button> */}
                       <button className="btn btn-primary font-bold" onMouseOver={()=>{setEdit(true); setRideDetails({ pickup: ride.pickup, destination: ride.destination, departureDate: getFormattedDate(ride.departureDate), carName: ride.carName, carColor: ride.carColor, fare: ride.fare, availableSeats: ride.availableSeats })}} onClick={()=>{document.getElementById(`my_add_ride_modal_${index}`).showModal()}}><PenBox className="size-5"/> Edit Ride</button>
+                      <button className="btn btn-primary" onClick={()=>{ document.getElementById(`my_passenger_modal_${index}`).showModal() }}><User2/> Edit Passengers</button>
                       <button className="btn btn-error text-white font-bold" onClick={()=>{ document.getElementById(`my_ride_deletion_confirmation_modal_${index}`).showModal() }}><X/> Delete</button>
                     </div>
                   </div>

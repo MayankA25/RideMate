@@ -3,6 +3,7 @@ import { getEstimatedTimeOfArrival } from "../utils/routing.js";
 import { Group } from "../models/Group.js";
 import { mailQueue } from "../utils/queue.js";
 import { Message } from "../models/Message.js";
+import { User } from "../models/User.js";
 
 export const getAllRides = async (req, res) => {
   const { pickup, destination, departureDate } = req.query;
@@ -544,7 +545,7 @@ export const removeRide = async(req, res)=>{
     const refreshToken = req.session.passport.user.refreshToken;
     const cc = [];
     const bcc = [];
-    const subject = `Regarding your ride booking from ${removedRide.pickup.address} to ${removedRide.destination.address} scheduled on ${new Date(removedRide.departureDate).toDateString()}`;
+    const subject = `Regarding your ride booking from ${removedRide.pickup.address} to ${removedRide.destination.address} scheduled on ${new Date(removedRide.departureDate).toDateString()} with driver ${removeRide.driver.firstName}(${removedRide.driver.email})`;
     const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${removedRide.pickup.address}</span> to <span style="font-weight:700">${removedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(removedRide.departureDate).toDateString()}</span> which was assigned to ${removedRide.driver.firstName} ${removedRide.driver.lastName}(${removedRide.driver.email}), has been deleted by the ${foundRide.driver._id == req.session.passport.user.user._id ? "Driver" : "Admin"}(${senderMail}) and is no longer available on the RideMate.</span>.
     <br><br>
     <br></br>
@@ -570,6 +571,94 @@ export const removeRide = async(req, res)=>{
     }
     
     return res.status(200).json({ msg: "Ride Removed Successfully" })
+
+  }catch(e){
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server Error" })
+  }
+}
+
+export const removePassenger = async(req, res)=>{
+  const { rideId, passengerId } = req.body;
+  try{
+    const foundRide = await Ride.findById(rideId);
+    if(!foundRide) return res.status(400).json({ msg: "Ride Not Found" });
+    
+    // const deletedMessages = await Message.deleteMany(
+    //   { group: foundRide.group }
+    // );
+
+    const updatedRide = await Ride.findByIdAndUpdate(rideId, {
+      $pull: { passengers: passengerId }
+    }, { new: true }).populate('driver').populate('passengers').populate('group')
+
+    console.log("Deleted Ride: ", updatedRide);
+
+    const updatedGroup = await Group.findByIdAndUpdate(rideId, {
+      $pull: { members: passengerId }
+    }, { new: true }).populate('members');
+
+    console.log("Updated Group: ", updatedGroup);
+
+    const parentIds = await Message.distinct("_id", {
+      sender: passengerId,
+       group: foundRide.group
+    });
+
+    console.log("Parent IDs: ", parentIds);
+
+    await Promise.all([
+      await Message.updateMany(
+        {
+           _id: { $in: parentIds } 
+        },
+        {
+          sender: null
+        }
+      ),
+
+      await Message.updateMany(
+        { 
+          parentId: { $in: parentIds } 
+        },
+        {
+          parentSenderName: null
+        }
+      )
+    ]);
+
+    const foundUser = await User.findById(passengerId).select('email');
+
+    const senderMail = req.session.passport.user.user.email;
+    const recipientMail = foundUser.email;
+    const accessToken = req.session.passport.user.accessToken;
+    const refreshToken = req.session.passport.user.refreshToken;
+    const cc = [];
+    const bcc = [];
+    const subject = `Regarding your ride booking from ${updatedRide.pickup.address} to ${updatedRide.destination.address} scheduled on ${new Date(updatedRide.departureDate).toDateString()} with driver ${updatedRide.driver.firstName} (${updatedRide.driver.email})`;
+
+    const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${updatedRide.pickup.address}</span> to <span style="font-weight:700">${updatedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(updatedRide.departureDate).toDateString()}</span> which was assigned to<span style="font-weight:700">${updatedRide.driver.firstName} ${updatedRide.driver.lastName} (${updatedRide.driver.email})</span>, has removed you from the ride booking</span>.
+    <br><br>
+    <br></br>
+    Kindly refer to other rides available on RideMate.
+    <br><br>
+    <br></br>
+    Sorry for the inconvenience caused
+    </span>`;
+    
+    await mailQueue.add('mailQueue', {
+      senderMail: senderMail,
+      recipient: recipientMail,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      subject: subject,
+      message: message,
+      cc: cc,
+      bcc: bcc,
+      attachment: {}
+    })
+
+    return res.status(200).json({ msg: "Passenger Removed Successfully", ride: updatedRide })
 
   }catch(e){
     console.log(e);
