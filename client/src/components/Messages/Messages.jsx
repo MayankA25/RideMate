@@ -3,6 +3,7 @@ import MessageBox from "../MessageBox/MessageBox";
 import useChatStore from "../../store/useChatStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useEffect } from "react";
+import MessageBoxSkeleton from "../MessageBoxSkeleton/MessageBoxSkeleton";
 
 export default function Messages() {
   const {
@@ -10,7 +11,9 @@ export default function Messages() {
     subscribeToGroupMessages,
     unsubscribeToGroupMessages,
     getMessages,
-    selectedGroup
+    selectedGroup,
+    gettingMessages,
+    gettingGroup
   } = useChatStore();
   const { user } = useAuthStore();
 
@@ -36,7 +39,14 @@ export default function Messages() {
     <div
       className="flex flex-col gap-3 py-3 px-5 h-[83.5%] overflow-y-scroll overflow-hidden scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent transition-all duration-200"
     >
-      {messages.map((message, index) => {
+      {(gettingMessages || gettingGroup) ? 
+      [...Array(10)].map((_, index)=>{
+        return (
+          <MessageBoxSkeleton key={index} index={index}/>
+        )
+      })
+       :
+       messages.map((message, index) => {
         return (
           <MessageBox
             key={index}
@@ -45,6 +55,7 @@ export default function Messages() {
             index={index}
             sender={message.sender ? message.sender : "Deleted User"}
           />
+          // <MessageBoxSkeleton index={index} />
         );
       })}
       <div ref={ref}></div>

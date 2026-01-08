@@ -6,7 +6,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useParams } from "react-router-dom";
 
 export default function ChatBox() {
-  const { sendMessage, selectedGroup, replyToMessage, setReplyToMessage, reply } = useChatStore();
+  const { sendMessage, selectedGroup, replyToMessage, setReplyToMessage, reply, gettingGroup, gettingMessages } = useChatStore();
 
   const { user } = useAuthStore();
 
@@ -37,10 +37,11 @@ export default function ChatBox() {
           </div>}
           <input
             type="text"
-            className="input input-primary focus:outline-0 rounded-full focus:bg-base-200 w-full px-4 py-5"
-            placeholder="Type Your Message"
+            className={`${(gettingGroup || gettingMessages) ? "skeleton py-3" : "input input-primary px-4 py-5"} focus:outline-0 rounded-full focus:bg-base-200 w-full `}
+            placeholder={(gettingGroup || gettingMessages) ? "" : "Type Your Message"}
             value={senderMessage}
             onChange={(e) => {
+              if(gettingGroup || gettingMessages) return;
               console.log("Text: ", e.target.value);
               setSenderMessage(e.target.value);
             }}
@@ -53,7 +54,7 @@ export default function ChatBox() {
         </div>
         <div
           ref={ref}
-          className="flex items-center justify-center bg-primary p-3 rounded-md cursor-pointer hover:bg-primary/80 transition-all"
+          className={`flex items-center justify-center  p-3 ${(gettingGroup || gettingMessages) ? "skeleton p-5" : "bg-primary rounded-md cursor-pointer hover:bg-primary/80 transition-all"}`}
           onClick={() => {
             replyToMessage ? reply(user._id, selectedGroup._id, senderMessage, params.id) :
             sendMessage(user._id, selectedGroup._id, senderMessage, params.id);
@@ -61,7 +62,7 @@ export default function ChatBox() {
             setReplyToMessage(null);
           }}
         >
-          <Send className="size-4" />
+          {!(gettingGroup || gettingMessages) && <Send className="size-4" />}
         </div>
       </div>
     </div>

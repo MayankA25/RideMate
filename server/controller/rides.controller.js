@@ -545,7 +545,7 @@ export const removeRide = async(req, res)=>{
     const refreshToken = req.session.passport.user.refreshToken;
     const cc = [];
     const bcc = [];
-    const subject = `Regarding your ride booking from ${removedRide.pickup.address} to ${removedRide.destination.address} scheduled on ${new Date(removedRide.departureDate).toDateString()} with driver ${removeRide.driver.firstName}(${removedRide.driver.email})`;
+    const subject = `Regarding your ride booking from ${removedRide.pickup.address} to ${removedRide.destination.address} scheduled on ${new Date(removedRide.departureDate).toDateString()} with driver ${removedRide.driver.firstName}(${removedRide.driver.email})`;
     const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${removedRide.pickup.address}</span> to <span style="font-weight:700">${removedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(removedRide.departureDate).toDateString()}</span> which was assigned to ${removedRide.driver.firstName} ${removedRide.driver.lastName}(${removedRide.driver.email}), has been deleted by the ${foundRide.driver._id == req.session.passport.user.user._id ? "Driver" : "Admin"}(${senderMail}) and is no longer available on the RideMate.</span>.
     <br><br>
     <br></br>
@@ -594,7 +594,7 @@ export const removePassenger = async(req, res)=>{
 
     console.log("Deleted Ride: ", updatedRide);
 
-    const updatedGroup = await Group.findByIdAndUpdate(rideId, {
+    const updatedGroup = await Group.findByIdAndUpdate(updatedRide.group._id, {
       $pull: { members: passengerId }
     }, { new: true }).populate('members');
 
@@ -626,6 +626,9 @@ export const removePassenger = async(req, res)=>{
         }
       )
     ]);
+
+    const isUserMember = await Group.exists({ _id: updatedGroup._id, members: passengerId });
+    console.log("Is User Member: ", isUserMember);
 
     const foundUser = await User.findById(passengerId).select('email');
 

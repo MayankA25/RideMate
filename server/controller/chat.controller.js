@@ -1,5 +1,6 @@
 import { Group } from "../models/Group.js";
 import { Message } from "../models/Message.js";
+import { Ride } from "../models/Rides.js";
 import { User } from "../models/User.js";
 import { io } from "../utils/socket.js";
 

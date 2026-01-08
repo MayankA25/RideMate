@@ -28,7 +28,7 @@ export const useAuthStore = create((set, get)=>({
             const response = await axiosInstance.get("/auth/getuser");
             console.log(response.data);
             const user = response.data.user;
-            user && get().connectSocket();
+            user && get().connectSocket(user._id);
             toast.success("Logged In Successfully");
             set({ authenticated: true, user: response.data.user });
         }catch(e){
@@ -61,17 +61,17 @@ export const useAuthStore = create((set, get)=>({
         }
     },
 
-    connectSocket: async()=>{
-        const { user } = get();
-
-        if(!user || get().socket?.connected )return;
+    connectSocket: async(userId)=>{
+        // const { user } = get();
+        console.log("Connecting Socket...");
+        if(get().socket ) return;
 
         console.log("Herereeeeee")
         
         const socket = io(BASE_URL, {
             transports: ["websocket"],
             query: {
-                userId: user._id
+                userId: userId
             }
         })
 

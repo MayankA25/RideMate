@@ -15,7 +15,7 @@ rideRouter.post("/joinride",verifyToken, joinRide);
 rideRouter.post("/cancelride",verifyToken, cancelRide);
 rideRouter.get("/getbookedrides", verifyToken, getBookedRides);
 rideRouter.get("/getuserrides", verifyAdminToken, getUserRides)
-rideRouter.delete("/removeride", verifyAdminToken, removeRide);
+rideRouter.delete("/removeride", verifyToken, removeRide);
 rideRouter.post("/removepassenger", verifyToken, removePassenger);
 
 export default rideRouter;

@@ -18,6 +18,8 @@ const useChatStore = create((set, get)=>({
 
     selectedReplyMessageIndex: null,
 
+    gettingMessages: false,
+
     setReplyToMessage: (val)=>{
         console.log("Reply To Message Id: ", val);
         set({ replyToMessage: val })
@@ -41,13 +43,16 @@ const useChatStore = create((set, get)=>({
     joinRoom: (rideId)=>{
         const { socket } = useAuthStore.getState();
 
+        console.log("Socket: ", socket);
+        if(!socket) return;
+
         socket.emit("join-room", { rideId });
         set({ online: get().online + 1 });
     },
 
     leaveRoom: (rideId)=>{
         const { socket } = useAuthStore.getState();
-
+        if(!socket) return;
         socket.emit("leave-room", { rideId });
         set({ online: get().online -1 });
     },
@@ -72,8 +77,10 @@ const useChatStore = create((set, get)=>({
 
     getMessages: async(groupId)=>{
         console.log("Group Id: ", groupId);
+        set({ messages: [] });
         if(!groupId) return;
         try{
+            set({ gettingMessages: true });
             const response = await axiosInstance.get("/chat/getmessages", {
                 params: {
                     groupId: groupId
@@ -82,7 +89,10 @@ const useChatStore = create((set, get)=>({
             console.log("Response: ", response.data);
             set({ messages: response.data.messages })
         }catch(e){
+            toast.error(e.response.data.msg);
             console.log(e);
+        }finally{
+            set({ gettingMessages: false });
         }
     },
 
@@ -149,6 +159,8 @@ const useChatStore = create((set, get)=>({
 
     subscribeToGroupMessages: ()=>{
         const { socket } = useAuthStore.getState();
+
+        if(!socket) return;
 
         socket.on("newGroupMessage", (message)=>{
             const messages = [...get().messages];
