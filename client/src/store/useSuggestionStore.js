@@ -22,7 +22,7 @@ export const useSuggestionStore = create((set, get)=>({
         carName: "",
         carColor: "",
         fare: 0,
-        availableSeats: 0
+        availableSeats: 1
     },
 
     suggesting: false,
@@ -41,7 +41,7 @@ export const useSuggestionStore = create((set, get)=>({
             place_id: ''
         },
         departureDate: '',
-        numberOfPassengers: 0
+        numberOfPassengers: 1
     },
 
     infoFilled: false,

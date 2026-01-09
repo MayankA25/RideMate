@@ -23,15 +23,19 @@ export const useRideStore = create((set, get) => ({
 
   cancelling: false,
   joining: false,
+  gettingRides: false,
+  gettingRideInfo: false,
 
   getAllRides: async () => {
     const { searchDetails } = useSuggestionStore.getState();
     try {
+      set({ gettingRides: true});
       const response = await axiosInstance.get("/rides/getrides", {
         params: {
           pickup: JSON.stringify(searchDetails.pickup),
           destination: JSON.stringify(searchDetails.destination),
           departureDate: searchDetails.departureDate,
+          seats: searchDetails.numberOfPassengers
         },
       });
       console.log("Rides: ", response.data);
@@ -54,6 +58,8 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       return toast.error("Error While Getting Available Rides");
+    } finally{
+      set({ gettingRides: false });
     }
   },
 
@@ -64,6 +70,7 @@ export const useRideStore = create((set, get) => ({
     const { rideDetails } = useSuggestionStore.getState();
     // const { rideDetails } = get();
     try {
+      set({ gettingRides: true });
       const response = await axiosInstance.post("/rides/addride", {
         driverId: user._id,
         pickup: rideDetails.pickup,
@@ -80,12 +87,15 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       throw new Error("Error While Adding Ride");
+    }finally{
+      set({ gettingRides: false });
     }
   },
 
   getDriverRides: async () => {
     const { user } = useAuthStore.getState();
     try {
+      set({ gettingRides: true });
       const response = await axiosInstance.get("/rides/getdriverrides", {
         params: {
           driverId: user._id,
@@ -95,12 +105,15 @@ export const useRideStore = create((set, get) => ({
       set({ driverRides: response.data.rides });
     } catch (e) {
       console.log(e);
+    } finally{
+      set({ gettingRides: false });
     }
   },
 
   updateRide: async (rideId) => {
     const { rideDetails } = useSuggestionStore.getState();
     try {
+      set({ gettingRides: true });
       const response = await axiosInstance.put("/rides/updateride", {
         rideId: rideId,
         pickup: rideDetails.pickup,
@@ -116,12 +129,15 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       throw new Error("Error While Updating Ride");
+    }finally{
+      set({ gettingRides: false });
     }
   },
 
   deleteRide: async (rideId) => {
     const { socket } = useAuthStore.getState();
     try {
+      set({ gettingRides: true });
       const tempRides = [...get().driverRides];
       const foundIndex = tempRides.findIndex(
         (ride, index) => ride._id == rideId
@@ -137,12 +153,15 @@ export const useRideStore = create((set, get) => ({
       socket.emit("leave-room", { rideId: rideId });
     } catch (e) {
       console.log(e);
+    }finally{
+      set({ gettingRides: false });
     }
   },
 
   getRideInfo: async (rideId) => {
     const { setStartCoords, setEndCoords } = useMapStore.getState();
     try {
+      set({ gettingRideInfo: true });
       const response = await axiosInstance.get("/rides/getrideinfo", {
         params: {
           rideId: rideId,
@@ -154,6 +173,8 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       toast.error("Error While Getting Ride Information");
+    }finally{
+      set({ gettingRideInfo: false });
     }
   },
 
@@ -218,6 +239,8 @@ export const useRideStore = create((set, get) => ({
 
     console.log("Ride: ", ride);
 
+    if(user?._id == ride?.driver?._id) return true;
+
     const passengers = ride?.passengers;
 
     console.log("Passengers: ", passengers);
@@ -233,12 +256,15 @@ export const useRideStore = create((set, get) => ({
 
   getBookedRides: async () => {
     try {
+      set({ gettingRides: true });
       const response = await axiosInstance.get("/rides/getbookedrides");
       console.log("Response: ", response.data);
 
       set({ bookedRides: response.data.rides });
     } catch (e) {
       console.log(e);
+    }finally{
+      set({ gettingRides: false });
     }
   },
 

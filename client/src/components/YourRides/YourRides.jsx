@@ -9,9 +9,10 @@ import useChatStore from "../../store/useChatStore";
 import DeleteRideConfirmation from "../DeleteRideConfirmation/DeleteRideConfirmation";
 import { useAuthStore } from "../../store/useAuthStore";
 import PassengersModal from "../PassengersModal/PassengersModal";
+import RideSkeleton from "../RideSkeleton/RideSkeleton";
 
 export default function YourRides() {
-  const { getDriverRides, driverRides, setEdit } = useRideStore();
+  const { getDriverRides, driverRides, setEdit, gettingRides } = useRideStore();
   const { setRideDetails } = useSuggestionStore();
   const { user } = useAuthStore();
   useEffect(() => {
@@ -44,7 +45,7 @@ export default function YourRides() {
               className="bg-indigo-900 px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 font-bold"
               onMouseOver={()=>{
                 setEdit(false);
-                setRideDetails({ pickup: { coordinates: [], address: '', place_id: '', addressLine1: "" }, destination: { coordinates: [], address: '', place_id: '', addressLine1: "" }, departureDate: '', carName: '', carColor: '', fare: 0, availableSeats: 0 })
+                setRideDetails({ pickup: { coordinates: [], address: '', place_id: '', addressLine1: "" }, destination: { coordinates: [], address: '', place_id: '', addressLine1: "" }, departureDate: '', carName: '', carColor: '', fare: 0, availableSeats: 1 })
               }}
               onClick={() =>
                 document.getElementById("my_add_ride_modal_number").showModal()
@@ -53,17 +54,24 @@ export default function YourRides() {
               <Plus /> New Ride
             </button>
           </div>
-          <div className="flex flex-col justify-center gap-5">
-            {driverRides.map((ride, index) => {
+          <div className={`flex flex-col justify-center gap-5`}>
+            {gettingRides ? (
+              [...Array(4)].map((_, index)=>{
+                return (
+                  <RideSkeleton key={index}/>
+                )
+              })
+            ) : (driverRides.map((ride, index) => {
               return (
                 <div
                   key={index}
-                  className="flex flex-col justify-center bg-base-200 shadow-xl gap-3 rounded-2xl py-1 px-2"
+                  className="flex flex-col justify-center bg-base-200 shadow-xl gap-3 rounded-2xl py-1 px-2 relative"
                 >
                   <AddRideModal index={index} id={ride._id} />
                   <DeleteRideConfirmation index={index} rideId={ride._id} pickup={ride.pickup.address} destination={ride.destination.address} departureDate={new Date(ride.departureDate).toDateString()}/>
                   <PassengersModal rideId={ride._id} index={index} passengers={ride.passengers}/>
-                  <div className="grid grid-cols-4 w-full">
+                  <div className="flex items-center justify-center font-semibold text-sm py-1 bg-base-300 absolute top-0 w-full left-0 rounded-t-xl"><span className="font-bold mx-2">Published At:</span> { new Date(ride.createdAt).toDateString() }, { `${new Date(ride.createdAt).getHours()}`.padStart(2, "0") }:{ `${new Date(ride.createdAt).getMinutes()}`.padStart(2, "0") }</div>
+                  <div className="grid grid-cols-4 w-full pt-5">
                     <div className="flex items-center p-5 py-8 gap-10 pl-15 cursor-pointer" onClick={()=>{navigate(`/info/rides/${ride._id}`)}}>
                       {/* <div className="grid grid-cols-1 gap-8">
                         <h1 className="font-semibold flex flex-col">
@@ -147,8 +155,9 @@ export default function YourRides() {
                     </div>
                   </div>
                 </div>
+                // <RideSkeleton/>
               );
-            })}
+            }))}
           </div>
         </div>
       </div>

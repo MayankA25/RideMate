@@ -48,11 +48,16 @@ const rideSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
+    passengersJoinedAt: {
+        type: Map,
+        of: Date,
+        default: {}
+    },
     group: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Group'
     }
-});
+}, { timestamps: true });
 
 
 export const Ride = mongoose.model("Ride", rideSchema);

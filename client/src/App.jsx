@@ -16,17 +16,19 @@ import Form from "./components/Form/Form";
 import { useFormStore } from "./store/useFormStore";
 import RideInfo from "./components/RideInfo/RideInfo";
 import Wrapper from "./pages/Wrapper/Wrapper";
+import { useRideStore } from "./store/userRideStore";
 
 function App() {
   const { getUser, authenticated, user } = useAuthStore();
   const { initialFormSubmitted } = useFormStore();
+  const { gettingRides } = useRideStore();
 
   useEffect(() => {
     getUser();
   }, []);
 
   return (
-    <div className="relative w-[100vw] h-[100vh] overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-base-300">
+    <div className={`relative w-[100vw] h-[100vh] overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-base-300 ${gettingRides && "overflow-y-hidden"}`}>
 
       <Routes>
         <Route exact path="/" element={<LandingPage />}></Route>

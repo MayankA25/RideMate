@@ -21,7 +21,7 @@ export default function RideCard({ ride, index }) {
   return (
     <div
       key={index}
-      className="flex flex-col justify-center bg-base-200 shadow-xl gap-3 rounded-2xl py-1 px-2"
+      className="flex flex-col justify-center bg-base-200 shadow-xl gap-3 rounded-2xl py-1 px-2 relative"
     >
       {/* <AddRideModal index={index} id={ride._id} /> */}
       <RideBookingConfirmation
@@ -31,7 +31,8 @@ export default function RideCard({ ride, index }) {
         rideId={ride._id}
         number={0}
       />
-      <div className="grid grid-cols-4 w-full">
+      <div className="flex items-center justify-center font-semibold text-sm py-1 bg-base-300 absolute top-0 w-full left-0 rounded-t-xl"><span className="font-bold mx-2">Published At:</span> { new Date(ride.createdAt).toDateString() }, { `${new Date(ride.createdAt).getHours()}`.padStart(2, "0") }:{ `${new Date(ride.createdAt).getMinutes()}`.padStart(2, "0") }</div>
+      <div className="grid grid-cols-4 w-full pt-2">
         <div
           className="flex items-center p-5 py-8 gap-10 pl-15 cursor-pointer"
           onClick={() => {
@@ -104,7 +105,7 @@ export default function RideCard({ ride, index }) {
             }}
           >
             {ride?.passengers.length < ride?.availableSeats && <User className="size-5" />}
-            { ride.passengers.length >= ride.availableSeats ? "Full" : (checkIfUserIsPassenger(ride) ? "Booked" : "Book Now")}
+            { (ride.passengers.length >= ride.availableSeats && !checkIfUserIsPassenger(ride)) ? "Full" : (checkIfUserIsPassenger(ride) ? "Booked" : "Book Now")}
           </button>
           {params?.id && (
             <button className="btn btn-error text-white font-bold" onClick={()=>{

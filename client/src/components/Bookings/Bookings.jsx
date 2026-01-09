@@ -11,10 +11,13 @@ import {
 import { useNavigate } from "react-router-dom";
 import useChatStore from "../../store/useChatStore";
 import RideBookingConfirmation from "../RideBookingConfirmation/RideBookingConfirmation";
+import RideSkeleton from "../RideSkeleton/RideSkeleton";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function Bookings() {
-  const { getBookedRides, bookedRides, cancelling } = useRideStore();
+  const { getBookedRides, bookedRides, cancelling, gettingRides } = useRideStore();
   const { getSelectedGroup, setSelectedGroup } = useChatStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     getBookedRides();
@@ -46,11 +49,17 @@ export default function Bookings() {
             </h1>
           </div>
           <div className="flex flex-col gap-5">
-            {bookedRides.map((ride, index) => {
+            {gettingRides ? (
+              [...Array(4)].map((_, index)=>{
+                return (
+                  <RideSkeleton key={index} />
+                )
+              })
+            ) : bookedRides.map((ride, index) => {
               return (
                 <div
                   key={index}
-                  className="flex flex-col justify-center bg-base-200 shadow-xl gap-3 rounded-2xl py-1 px-2"
+                  className="flex flex-col justify-center bg-base-200 shadow-xl gap-3 rounded-2xl py-1 px-2 relative"
                 >
                   {/* <AddRideModal index={index} id={ride._id} /> */}
                   <RideBookingConfirmation
@@ -61,7 +70,8 @@ export default function Bookings() {
                     number={1}
                   />
                   {/* <RideBookingConfirmation index={index} pickup={ride.pickup.address} destination={ride.destination.address} rideId={ride._id} /> */}
-                  <div className="grid grid-cols-4 w-full">
+                  <div className="flex items-center justify-center font-semibold text-sm py-1 bg-base-300 absolute top-0 w-full left-0 rounded-t-xl"><span className="font-bold mx-2">Joined At:</span> { new Date(ride.passengersJoinedAt[`${user._id}`]).toDateString() }, { `${new Date(ride.passengersJoinedAt[`${user._id}`]).getHours()}`.padStart(2, "0") }:{ `${new Date(ride.passengersJoinedAt[`${user._id}`]).getMinutes()}`.padStart(2, "0") }</div>
+                  <div className="grid grid-cols-4 w-full pt-2">
                     <div
                       className="flex items-center p-5 py-8 gap-10 pl-15 cursor-pointer"
                       onClick={() => {

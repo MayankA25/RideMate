@@ -37,7 +37,7 @@ export default function Messages() {
 
   return (
     <div
-      className="flex flex-col gap-3 py-3 px-5 h-[83.5%] overflow-y-scroll overflow-hidden scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent transition-all duration-200"
+      className={`flex flex-col gap-3 py-3 px-5 h-[83.5%] overflow-hidden scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent transition-all duration-200 ${(gettingGroup || gettingMessages) ? "overflow-y-hidden" : "overflow-y-scroll"}`}
     >
       {(gettingMessages || gettingGroup) ? 
       [...Array(10)].map((_, index)=>{

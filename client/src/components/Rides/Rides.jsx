@@ -13,10 +13,11 @@ import { useEffect } from "react";
 import { useSuggestionStore } from "../../store/useSuggestionStore";
 import RideBookingConfirmation from "../RideBookingConfirmation/RideBookingConfirmation";
 import RideCard from "../RideCard/RideCard";
+import RideSkeleton from "../RideSkeleton/RideSkeleton";
 
 export default function Rides() {
   const navigate = useNavigate();
-  const { rides, getAllRides, joinRide, checkIfUserIsPassenger, joining } =
+  const { rides, getAllRides, joinRide, checkIfUserIsPassenger, joining, gettingRides } =
     useRideStore();
 
   const { infoFilled, setInfoFilled } = useSuggestionStore();
@@ -54,7 +55,13 @@ export default function Rides() {
             </h1>
           </div>
           <div className="flex flex-col gap-5">
-            {rides.map((ride, index) => {
+            {gettingRides ? (
+              [...Array(4)].map((_, index)=>{
+                return (
+                  <RideSkeleton key={index} />
+                )
+              })
+            ) : rides.map((ride, index) => {
               return (
                 <RideCard key={index} ride={ride} index={index} />
               );

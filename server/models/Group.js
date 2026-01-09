@@ -10,7 +10,12 @@ const groupSchema = new Schema({
     members: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }]
+    }],
+    membersJoinedAt: {
+        type: Map,
+        of: Date,
+        default: {}
+    }
 }, { timestamps: true });
 
 

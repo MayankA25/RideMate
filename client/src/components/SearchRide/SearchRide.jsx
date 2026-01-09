@@ -40,9 +40,17 @@ export default function SearchRide() {
         place_id: "",
       },
       departureDate: "",
-      numberOfPassengers: 0,
+      numberOfPassengers: 1,
     });
   }, []);
+
+  const validateSearchDetails = (searchDetails)=>{
+    const { pickup, destination, departureDate, numberOfPassengers } = searchDetails;
+
+    if(pickup.coordinates.length == 0 || pickup.address.trim().length == 0 || pickup.place_id.trim().length == 0 || destination.coordinates.length == 0 || destination.address.trim().length == 0 || destination.place_id.trim().length == 0 || departureDate.trim().length == 0 || numberOfPassengers <= 0) return false;
+
+    return true
+  }
 
   return (
     <div className="flex items-center w-[78%] m-auto">
@@ -223,6 +231,7 @@ export default function SearchRide() {
           <button
             className="btn btn-primary w-full"
             onClick={() => {
+              if(!validateSearchDetails(searchDetails)) return toast.error("Provide Valid Details")
               getAllRides();
               navigate("/dashboard/rides");
               setInfoFilled(true);

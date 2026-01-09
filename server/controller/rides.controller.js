@@ -6,7 +6,7 @@ import { Message } from "../models/Message.js";
 import { User } from "../models/User.js";
 
 export const getAllRides = async (req, res) => {
-  const { pickup, destination, departureDate } = req.query;
+  const { pickup, destination, departureDate, seats } = req.query;
   const pickupJson = await JSON.parse(pickup);
   const destinationJson = await JSON.parse(destination);
   console.log("Pickup: ", pickupJson);
@@ -36,6 +36,7 @@ export const getAllRides = async (req, res) => {
 
     console.log("Start Date: ", startDate);
     console.log("End Date: ", endDate);
+    console.log("Seats: ", seats);
 
     const rides = await Ride.find({
       "pickup.place_id": pickupJson.place_id,
@@ -45,6 +46,7 @@ export const getAllRides = async (req, res) => {
         $lt: new Date(endDate),
       },
       driver: { $ne: req.session.passport.user.user._id },
+      availableSeats: { $gte: seats }
     })
       .populate("driver")
       .populate("passengers")
@@ -94,6 +96,7 @@ export const addRide = async (req, res) => {
       "Destination Coords: ",
       destinationCoords
     );
+    if(availableSeats <= 0 || fare < 0 ) return res.status(400).json({ msg: "Error Occurred. Enter all the fields correcly." })
     const departureTimeInMilliSeconds = new Date(departureDate).getTime();
     const currentTimeInMilliSeconds = new Date().getTime();
 
@@ -160,6 +163,8 @@ export const updateRide = async (req, res) => {
   } = req.body;
   const pickupCoords = [...pickup.coordinates].reverse();
   const destinationCoords = [...destination.coordinates].reverse();
+
+  if(availableSeats <= 0 || fare < 0 ) return res.status(400).json({ msg: "Error Occurred. Enter all the fields correcly." })
 
   const foundRide = await Ride.findById(rideId)
     .populate("driver")
@@ -350,7 +355,8 @@ export const joinRide = async (req, res) => {
         }
       },
       {
-        $addToSet: { passengers: userId }
+        $addToSet: { passengers: userId },
+        $set: { [`passengersJoinedAt.${userId}`] : new Date() }
       },
       { new: true }
     ).populate('driver').populate('passengers').populate('group');
@@ -362,6 +368,7 @@ export const joinRide = async (req, res) => {
       updatedRide.group._id,
       {
         $addToSet: { members: userId },
+        $set: { [`membersJoinedAt.${userId}`] : new Date() }
       },
       { new: true }
     );
@@ -387,6 +394,7 @@ export const cancelRide = async (req, res) => {
       rideId,
       {
         $pull: { passengers: userId },
+        $unset: { [`passengersJoinedAt.${userId}`] : "" }
       },
       { new: true }
     )
@@ -399,6 +407,7 @@ export const cancelRide = async (req, res) => {
       updatedRide.group._id,
       {
         $pull: { members: userId },
+        $unset: { [`membersJoinedAt.${userId}`] : '' }
       },
       { new: true }
     );
@@ -554,8 +563,10 @@ export const removeRide = async(req, res)=>{
     <br></br>
     Sorry for the inconvenience caused
     </span>`;
-    if(removedRide.passengers.length > 0){
-      removedRide.passengers.forEach(async(passenger, index)=>{
+    const passengers = [ ...removedRide.passengers ];
+    if(foundRide.driver._id != req.session.passport.user.user._id) passengers.push(req.session.passport.user.user);
+    if(passengers.length > 0){
+      passengers.forEach(async(passenger, index)=>{
         await mailQueue.add('mailQueue', {
           senderMail,
           recipient: passenger.email,
@@ -589,13 +600,15 @@ export const removePassenger = async(req, res)=>{
     // );
 
     const updatedRide = await Ride.findByIdAndUpdate(rideId, {
-      $pull: { passengers: passengerId }
+      $pull: { passengers: passengerId },
+      $unset: { [`passengersJoinedAt.${passengerId}`] : '' }
     }, { new: true }).populate('driver').populate('passengers').populate('group')
 
     console.log("Deleted Ride: ", updatedRide);
 
     const updatedGroup = await Group.findByIdAndUpdate(updatedRide.group._id, {
-      $pull: { members: passengerId }
+      $pull: { members: passengerId },
+      $unset: { [`membersJoinedAt.${passengerId}`] : "" }
     }, { new: true }).populate('members');
 
     console.log("Updated Group: ", updatedGroup);
@@ -632,6 +645,8 @@ export const removePassenger = async(req, res)=>{
 
     const foundUser = await User.findById(passengerId).select('email');
 
+    const userId = req.session.passport.user.user._id;
+
     const senderMail = req.session.passport.user.user.email;
     const recipientMail = foundUser.email;
     const accessToken = req.session.passport.user.accessToken;
@@ -640,7 +655,7 @@ export const removePassenger = async(req, res)=>{
     const bcc = [];
     const subject = `Regarding your ride booking from ${updatedRide.pickup.address} to ${updatedRide.destination.address} scheduled on ${new Date(updatedRide.departureDate).toDateString()} with driver ${updatedRide.driver.firstName} (${updatedRide.driver.email})`;
 
-    const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${updatedRide.pickup.address}</span> to <span style="font-weight:700">${updatedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(updatedRide.departureDate).toDateString()}</span> which was assigned to<span style="font-weight:700">${updatedRide.driver.firstName} ${updatedRide.driver.lastName} (${updatedRide.driver.email})</span>, has removed you from the ride booking</span>.
+    const message = `<span style="font-weight:600">Your ride booking from <span style="font-weight:700">${updatedRide.pickup.address}</span> to <span style="font-weight:700">${updatedRide.destination.address}</span> scheduled on <span style="font-weight:700">${new Date(updatedRide.departureDate).toDateString()}</span> which was assigned to<span style="font-weight:700">${updatedRide.driver.firstName} ${updatedRide.driver.lastName} (${updatedRide.driver.email})</span>. You have been removed from the booking by ${updatedRide.driver._id == userId ? `Driver (${senderMail})` : `Admin (${senderMail}) `}</span>.
     <br><br>
     <br></br>
     Kindly refer to other rides available on RideMate.
