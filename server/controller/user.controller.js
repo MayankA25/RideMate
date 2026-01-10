@@ -115,67 +115,163 @@ export const getUsers = async (req, res) => {
 //   }
 // };
 
+// export const removeUser = async(req, res)=>{
+//   const { userId } = req.query;
+//   console.log("UserId: ", userId);
+//   try{
+//     const foundUser = await User.findById(userId);
+//     if(!foundUser) throw new Error("User Not Found");
 
-export const removeUser = async(req, res)=>{
+//     // Case-1: The User Is Driver
+
+//     const groupIds = await Ride.distinct('group', {
+//       driver: userId
+//     });
+
+//     console.log("Group Ids: ", groupIds);
+
+//     await Promise.all([
+//       Message.deleteMany({ group: { $in: groupIds } }),
+//       Group.deleteMany({ _id: { $in: groupIds } }),
+//       Ride.deleteMany({ sender: userId })
+//     ])
+
+//     // Case-2: The User is Passenger
+
+//     const passengerGroupIds = await Ride.distinct('group', {
+//       passengers: userId
+//     })
+
+//     console.log("Passenger Group Ids: ", passengerGroupIds);
+
+//     await Promise.all([
+//       Message.updateMany(
+//         {
+//           group: { $in: passengerGroupIds }
+//         },
+//         {
+//           sender: null
+//         }
+//       ),
+//       Group.updateMany(
+//         {
+//           _id: { $in: passengerGroupIds }
+//         },
+//         {
+//           $pull: { members: userId },
+//           $unset: { [`membersJoinedAt.${userId}`] : '' }
+//         }
+//       ),
+//       Ride.updateMany(
+//         {
+//           group: { $in: passengerGroupIds }
+//         },
+//         {
+//           $pull: { passengers: userId },
+//           $unset: { [`passengersJoinedAt.${userId}`] : "" }
+//         }
+//       )
+//     ]);
+
+//     await User.findByIdAndDelete(userId);
+
+//     console.log("Probably Deleted All Possible Data Related To User.");
+
+//     return res.status(200).json({ msg: "User Removed Successfully." });
+
+//   }catch(e){
+//     console.log(e);
+//     return res.status(500).json({ msg: "Internal Server Error" })
+//   }
+// }
+
+export const removeUser = async (req, res) => {
   const { userId } = req.query;
-  try{
+  try {
     const foundUser = await User.findById(userId);
-    if(!foundUser) throw new Error("User Not Found");
+    if (!foundUser) return res.status(400).json({ msg: "User Not Found" });
 
-    // Case-1: The User Is Driver
+    // Case-1: The User is Driver
 
-    const groupIds = await Ride.distinct('group', {
-      driver: userId
+    const groupIds = await Ride.distinct("group", { driver: userId });
+
+    await Promise.all([
+      Group.deleteMany({
+        _id: { $in: groupIds },
+      }),
+      Message.deleteMany({
+        group: { $in: groupIds },
+      }),
+      Ride.deleteMany({
+        driver: userId,
+      }),
+    ]);
+
+    // Case-2: The User is Passenger;
+
+    const passengerGroupIds = await Ride.distinct("group", {
+      passengers: userId,
     });
 
-    console.log("Group Ids: ", groupIds);
-
     await Promise.all([
-      Message.deleteMany({ group: { $in: groupIds } }),
-      Group.deleteMany({ _id: { $in: groupIds } }),
-      Ride.deleteMany({ sender: userId })
-    ])
-
-
-    // Case-2: The User is Passenger
-
-    const passengerGroupIds = await Ride.distinct('group', {
-      passengers: userId
-    })
-
-    console.log("Passenger Group Ids: ", passengerGroupIds);
-
-    await Promise.all([
-      Message.updateMany(
-        {
-          group: { $in: passengerGroupIds }
-        }, 
-        {
-          sender: null
-        }
-      ),
       Group.updateMany(
         { 
-          _id: { $in: passengerGroupIds } 
+          _id: { 
+            $in: passengerGroupIds 
+          } 
         },
         {
-          $pull: { members: userId }
+          $pull: { members: userId },
+          $unset: { [`membersJoinedAt.${userId}`] : "" }
         }
       ),
+
       Ride.updateMany(
         {
           group: { $in: passengerGroupIds }
         },
         {
-          $pull: { passengers: userId }
+          $pull: { passengers: userId },
+          $unset: { [`passengersJoinedAt.${userId}`] : "" }
         }
       )
-    ])
-  
-    
+    ]);
 
-  }catch(e){
+    console.log("Phase1 completed");
+
+    const parentIds = await Message.distinct("_id", { sender: userId });
+
+    console.log("Parent Ids: ", parentIds);
+
+    await Promise.all([
+      Message.updateMany(
+        { 
+          _id: { $in: parentIds } 
+        },
+        {
+          sender: null
+        }
+      ),
+
+      Message.updateMany(
+        { 
+          parentId: { $in: parentIds } 
+        },
+        {
+          parentSenderName: null
+        }
+      )
+    ]);
+
+    await User.findByIdAndDelete(userId);
+
+    console.log("Phase 2 completed")
+
+
+    return res.status(200).json({ msg: "User Removed Successfully" })
+
+  } catch (e) {
     console.log(e);
-    return res.status(500).json({ msg: "Internal Server Error" })
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
-}
+};

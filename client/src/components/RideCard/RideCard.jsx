@@ -32,7 +32,7 @@ export default function RideCard({ ride, index }) {
         number={0}
       />
       <div className="flex items-center justify-center font-semibold text-sm py-1 bg-base-300 absolute top-0 w-full left-0 rounded-t-xl"><span className="font-bold mx-2">Published At:</span> { new Date(ride.createdAt).toDateString() }, { `${new Date(ride.createdAt).getHours()}`.padStart(2, "0") }:{ `${new Date(ride.createdAt).getMinutes()}`.padStart(2, "0") }</div>
-      <div className="grid grid-cols-4 w-full pt-2">
+      <div className="grid grid-cols-4 w-full pt-5">
         <div
           className="flex items-center p-5 py-8 gap-10 pl-15 cursor-pointer"
           onClick={() => {

@@ -3,11 +3,12 @@ import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import RideCard from '../RideCard/RideCard';
 import { useUserStore } from '../../store/useUserStore';
+import RideSkeleton from '../RideSkeleton/RideSkeleton';
 
 export default function UserRides() {
     const navigate = useNavigate();
 
-    const { getUserRides, userRides } = useUserStore();
+    const { getUserRides, userRides, loading } = useUserStore();
 
     const params = useParams();
 
@@ -39,7 +40,11 @@ export default function UserRides() {
             </h1>
           </div>
           <div className="flex flex-col gap-5">
-            {userRides.map((ride, index) => {
+            {loading ? [...Array(4)].map((_, index)=>{
+              return (
+                <RideSkeleton key={index}/>
+              )
+            }) : userRides.map((ride, index) => {
               return (
                 <RideCard key={index} ride={ride} index={index} />
               );

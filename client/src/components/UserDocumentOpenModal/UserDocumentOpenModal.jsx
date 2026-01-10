@@ -7,10 +7,10 @@ export default function UserDocumentOpenModal({
   documentStatus,
   userId,
 }) {
-  const { getRequests, approveRequest, rejectRequest, requests } = useRequestStore();
-  useEffect(() => {
-      getRequests();
-    }, []);
+  const { approveRequest, rejectRequest } = useRequestStore();
+  // useEffect(() => {
+  //     getRequests();
+  //   }, []);
   return (
     <dialog id={`my_user_open_doc_modal_${id}`} className="modal">
       <div className="modal-box">

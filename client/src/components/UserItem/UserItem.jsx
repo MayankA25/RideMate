@@ -2,6 +2,8 @@ import { BadgeCheck, ChevronRight } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import UserDocumentOpenModal from "../UserDocumentOpenModal/UserDocumentOpenModal";
+import { useUserStore } from "../../store/useUserStore";
+import RemoveUserConfirmation from "../RmoveUserConfirmation/RemoveUserConfirmation";
 
 export default function UserItem({ specificUser, index }) {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ export default function UserItem({ specificUser, index }) {
         documentStatus={specificUser.drivingLicenseStatus}
         userId={specificUser._id}
       />
+      <RemoveUserConfirmation index={index} user={specificUser} />
       <div
         className="flex items-center justify-between hover:bg-white/5 cursor-pointer transition-all py-5 px-4 rounded-lg"
         onClick={() => {
@@ -59,13 +62,13 @@ export default function UserItem({ specificUser, index }) {
             specificUser.aadharCardStatus == "verified" ||
             specificUser.drivingLicense == "under review" ||
             specificUser.drivingLicenseStatus == "verified") &&
-          "grid-cols-3"
+          "grid-cols-4"
         } ${
           (specificUser.aadharCardStatus == "under review" ||
             specificUser.aadharCardStatus == "verified") &&
           (specificUser.drivingLicenseStatus == "under review" ||
             specificUser.drivingLicenseStatus == "verified") &&
-          "grid-cols-4"
+          "grid-cols-5"
         } ${
           !(
             specificUser.aadharCardStatus == "under review" ||
@@ -75,7 +78,7 @@ export default function UserItem({ specificUser, index }) {
             specificUser.drivingLicenseStatus == "under review" ||
             specificUser.drivingLicenseStatus == "verified"
           ) &&
-          "grid-cols-2"
+          "grid-cols-3"
         } gap-3`}
       >
         {(specificUser.aadharCardStatus == "under review" ||
@@ -100,7 +103,11 @@ export default function UserItem({ specificUser, index }) {
         <button className="btn btn-primary font-bold" onClick={()=>{
           navigate(`/dashboard/users/rides/${specificUser._id}`)
         }}>Show Rides</button>
-        <button className="btn btn-error text-white font-bold">Remove</button>
+        <button className="btn btn-error text-white font-bold" onClick={()=>{
+          // removeUser(specificUser._id);
+          document.getElementById(`my_remove_user_modal_${index}`).showModal();
+        }}>Remove</button>
+        <button className="btn btn-error text-white font-bold">Ban Permanently</button>
       </div>
     </div>
   );

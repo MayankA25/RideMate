@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom";
 import UserItem from "../UserItem/UserItem";
 import { useEffect } from "react";
 import { useUserStore } from "../../store/useUserStore";
+import UserSkeleton from "../UserItemSkeleton/UserSkeleton";
 
 export default function User() {
   const navigate = useNavigate();
-  const { getAllUsers, allUsers, filterUsers } = useUserStore();
+  const { getAllUsers, allUsers, filterUsers, loading } = useUserStore();
   useEffect(() => {
     getAllUsers();
   }, []);
@@ -31,7 +32,11 @@ export default function User() {
             filterUsers(e.target.value.trim().toLowerCase())
           }} />
           <div className="flex flex-col justify-center gap-3">
-            {allUsers.map((user, index) => {
+            {loading ? [...Array(7)].map((_, index)=>{
+              return (
+                <UserSkeleton key={index} />
+              )
+            }) : allUsers.map((user, index) => {
               return <UserItem key={index} specificUser={user} index={index} />;
             })}
           </div>

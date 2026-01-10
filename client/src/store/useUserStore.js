@@ -10,8 +10,11 @@ export const useUserStore = create((set, get)=>({
 
     userRides: [],
 
+    loading: false,
+
     getAllUsers: async()=>{
         try{
+            set({ loading: true });
             const response = await axiosInstance.get("/users/getusers");
             console.log("Response: ", response.data);
 
@@ -20,6 +23,8 @@ export const useUserStore = create((set, get)=>({
         }catch(e){
             console.log(e);
             toast.error("Error While Getting Users");
+        }finally{
+            set({ loading: false });
         }
     },
 
@@ -40,6 +45,7 @@ export const useUserStore = create((set, get)=>({
 
     getUserRides: async(userId)=>{
         try{
+            set({ loading: true });
             const response = await axiosInstance.get("/rides/getuserrides", {
                 params: {
                     userId: userId
@@ -49,6 +55,8 @@ export const useUserStore = create((set, get)=>({
             set({ userRides: response.data.rides })
         }catch(e){
             console.log(e);
+        }finally{
+            set({ loading: false });
         }
     },
 
@@ -92,5 +100,31 @@ export const useUserStore = create((set, get)=>({
         console.log("Filtered Users: ", filteredUsers);
 
         set({ allUsers: filteredUsers })
-    }
+    },
+
+    removeUser: async(userId)=>{
+        const allUsers = [...get().allUsers];
+        try{
+            set({ loading: true })
+            const response = await axiosInstance.delete("/users/removeuser", {
+                params: {
+                    userId: userId
+                }
+            });
+            console.log("Response: ", response.data);
+            const foundIndex = allUsers.findIndex((user, index)=>{
+                return user._id == userId
+            });
+            console.log("Found Index: ", foundIndex);
+            allUsers.splice(foundIndex, 1);
+            set({ allUsers: allUsers })
+        }catch(e){
+            console.log(e);
+            return toast.error("Error While Removing User")
+        }finally{   
+            set({ loading: false });
+        }
+    },
+
+
 }))
