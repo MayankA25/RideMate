@@ -4,6 +4,7 @@ import {
   ChevronsRight,
   ChevronUp,
   LockKeyhole,
+  Megaphone,
   ShipWheel,
   Signature,
   TicketCheck,
@@ -34,6 +35,11 @@ export default function Sidebar() {
       icon: <TicketCheck className="size-7" />,
       title: "Your Bookings",
       path: "/dashboard/bookings",
+    },
+    {
+      icon: <Megaphone className="size-7"/>,
+      title: "Ride Alerts",
+      path: "/dashboard/ride-alerts"
     },
     {
       icon: <LockKeyhole className="size-7" />,
@@ -70,7 +76,7 @@ export default function Sidebar() {
         </div>
         <div className="flex flex-col gap-2 w-full py-20">
           {tabs.map((tab, index) => {
-            if (index > 2 && user.role != "SuperAdmin") return;
+            if (index > 3 && user.role != "SuperAdmin") return;
             return (
               <div
                 key={index}

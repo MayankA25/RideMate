@@ -13,6 +13,7 @@ import { useSuggestionStore } from '../../store/useSuggestionStore'
 import Chat from '../Chat/Chat'
 import Map from '../../components/Map/Map'
 import UserWrapper from '../UserWrapper/UserWrapper'
+import RideAlert from '../../components/RideAlert/RideAlert'
 
 export default function Dashboard() {
   // const [ infoFilled, setInfoFilled ] = useState(false);
@@ -31,6 +32,7 @@ export default function Dashboard() {
         <Route path='partners' element={<Partners/>}/>
         <Route path='your-rides' element={<YourRides/>} />
         <Route path='bookings' element={<Bookings/>}/>
+        <Route path='ride-alerts' element={<RideAlert/>} />
         <Route path='users/*' element={<UserWrapper/>} />
         <Route path='requests' element={<Documents/>} />
         <Route path='chat/:id' element={<Chat/>}/>

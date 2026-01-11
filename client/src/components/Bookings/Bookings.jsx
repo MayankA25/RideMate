@@ -13,6 +13,7 @@ import useChatStore from "../../store/useChatStore";
 import RideBookingConfirmation from "../RideBookingConfirmation/RideBookingConfirmation";
 import RideSkeleton from "../RideSkeleton/RideSkeleton";
 import { useAuthStore } from "../../store/useAuthStore";
+import Header from "../Header/Header";
 
 export default function Bookings() {
   const { getBookedRides, bookedRides, cancelling, gettingRides } = useRideStore();
@@ -27,17 +28,7 @@ export default function Bookings() {
   return (
     <div className="w-[78%] h-full m-auto">
       <div className="flex flex-col py-10 gap-5">
-        <div className="flex items-center px-3 gap-5">
-          <span
-            className="flex items-center transition-all cursor-pointer hover:bg-base-300 p-2 rounded-full"
-            onClick={() => {
-              navigate(-1);
-            }}
-          >
-            <ArrowLeft className="size-5" />
-          </span>
-          <h1 className="font-bold text-xl">Booked Rides</h1>
-        </div>
+        <Header headerTitle={"Your Bookings"}/>
         <hr className="text-white/15" />
         <div className="flex flex-col justify-center gap-10">
           {/* <div className="flex items-center">
@@ -55,7 +46,7 @@ export default function Bookings() {
                   <RideSkeleton key={index} />
                 )
               })
-            ) : bookedRides.map((ride, index) => {
+            ) : bookedRides.length != 0 ? (bookedRides.map((ride, index) => {
               return (
                 <div
                   key={index}
@@ -202,7 +193,12 @@ export default function Bookings() {
                   </div>
                 </div>
               );
-            })}
+            })) : <div className="flex flex-col items-center justify-center gap-2">
+                <h1 className="font-bold text-xl">No Booked Rides</h1>
+                <p className="text-sm text-indigo-300 font-semibold cursor-pointer" onClick={()=>{
+                  navigate("/dashboard/search")
+                }}>Want to book?</p>
+              </div>}
           </div>
         </div>
       </div>
