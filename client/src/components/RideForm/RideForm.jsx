@@ -17,6 +17,7 @@ export default function RideForm({ type }) {
   } = useSuggestionStore();
 
   const { rideAlert, setRideAlert } = useRideAlertStore();
+  const { validateSearchDetails } = useRideStore();
 
   const [arrivalChanging, setArrivalChanging] = useState(false);
   const [destinationChanging, setDestinationChanging] = useState(false);
@@ -26,24 +27,24 @@ export default function RideForm({ type }) {
 
   const navigate = useNavigate();
 
-  const validateSearchDetails = (searchDetails) => {
-    const { pickup, destination, departureDate, numberOfPassengers } =
-      searchDetails;
+  // const validateSearchDetails = (searchDetails) => {
+  //   const { pickup, destination, departureDate, numberOfPassengers } =
+  //     searchDetails;
 
-    if (
-      pickup.coordinates.length == 0 ||
-      pickup.address.trim().length == 0 ||
-      pickup.place_id.trim().length == 0 ||
-      destination.coordinates.length == 0 ||
-      destination.address.trim().length == 0 ||
-      destination.place_id.trim().length == 0 ||
-      departureDate.trim().length == 0 ||
-      numberOfPassengers <= 0
-    )
-      return false;
+  //   if (
+  //     pickup.coordinates.length == 0 ||
+  //     pickup.address.trim().length == 0 ||
+  //     pickup.place_id.trim().length == 0 ||
+  //     destination.coordinates.length == 0 ||
+  //     destination.address.trim().length == 0 ||
+  //     destination.place_id.trim().length == 0 ||
+  //     departureDate.trim().length == 0 ||
+  //     numberOfPassengers <= 0
+  //   )
+  //     return false;
 
-    return true;
-  };
+  //   return true;
+  // };
   return (
     <div
       id={type}

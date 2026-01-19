@@ -1,11 +1,26 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import { useSuggestionStore } from "../../store/useSuggestionStore";
 import { useRideAlertStore } from "../../store/useRideAlertStore";
 import RideForm from "../RideForm/RideForm";
+import { Loader2 } from 'lucide-react';
+import toast, { Toaster } from "react-hot-toast";
+import { useRideStore } from "../../store/userRideStore";
 
 export default function AddRideAlertModal() {
-    const { addRideAlert } = useRideAlertStore();
+  const { addRideAlert, creating, rideAlertErrorMsg, rideAlert } = useRideAlertStore();
+  const { validateSearchDetails } = useRideStore();
+
+  useEffect(()=>{
+    if(rideAlertErrorMsg.trim().length == 0) return;
+    // toast.(rideAlertErrorMsg)
+    toast("Ride Already Present", {
+      icon: "⚠️"
+    })
+  }, [rideAlertErrorMsg]);
+
+  const ref = useRef(null);
+
   return (
     <dialog id={"my_add_ride_alert_modal"} className="modal">
       <div className="modal-box">
@@ -14,15 +29,29 @@ export default function AddRideAlertModal() {
           <RideForm type={"alert"} />
         </div>
         <div className="modal-action">
-          <form method="dialog" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             {/* if there is a button in form, it will close the modal */}
-            <button className="btn">Close</button>
-            <button className="btn btn-primary" onClick={()=>{
-                addRideAlert()
-            }}>Create</button>
-          </form>
+            <form method="dialog">
+              <button ref={ref} className="btn">Close</button>
+            </form>
+            <button
+              className="btn btn-primary"
+              disabled={creating}
+              onClick={() => {
+
+                if(!validateSearchDetails(rideAlert)) return toast.error("Provide Valid Details")
+
+                toast.promise(addRideAlert(), {
+                  loading: "Creating..."
+                });
+              }}
+            >
+              { creating ? <Loader2 className="animate-spin"/> : "Create" }
+            </button>
+          </div>
         </div>
       </div>
+      <Toaster/>
     </dialog>
   );
 }

@@ -20,22 +20,40 @@ export const useRideStore = create((set, get) => ({
 
   bookedRides: [],
 
-
   cancelling: false,
   joining: false,
   gettingRides: false,
   gettingRideInfo: false,
 
+  validateSearchDetails: (searchDetails) => {
+    const { pickup, destination, departureDate, numberOfPassengers } =
+      searchDetails;
+
+    if (
+      pickup.coordinates.length == 0 ||
+      pickup.address.trim().length == 0 ||
+      pickup.place_id.trim().length == 0 ||
+      destination.coordinates.length == 0 ||
+      destination.address.trim().length == 0 ||
+      destination.place_id.trim().length == 0 ||
+      departureDate.trim().length == 0 ||
+      numberOfPassengers <= 0
+    )
+      return false;
+
+    return true;
+  },
+
   getAllRides: async () => {
     const { searchDetails } = useSuggestionStore.getState();
     try {
-      set({ gettingRides: true});
+      set({ gettingRides: true });
       const response = await axiosInstance.get("/rides/getrides", {
         params: {
           pickup: JSON.stringify(searchDetails.pickup),
           destination: JSON.stringify(searchDetails.destination),
           departureDate: searchDetails.departureDate,
-          seats: searchDetails.numberOfPassengers
+          seats: searchDetails.numberOfPassengers,
         },
       });
       console.log("Rides: ", response.data);
@@ -58,12 +76,10 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       return toast.error("Error While Getting Available Rides");
-    } finally{
+    } finally {
       set({ gettingRides: false });
     }
   },
-
-  
 
   addRide: async () => {
     const { user, socket } = useAuthStore.getState();
@@ -87,7 +103,7 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       throw new Error("Error While Adding Ride");
-    }finally{
+    } finally {
       set({ gettingRides: false });
     }
   },
@@ -105,7 +121,7 @@ export const useRideStore = create((set, get) => ({
       set({ driverRides: response.data.rides });
     } catch (e) {
       console.log(e);
-    } finally{
+    } finally {
       set({ gettingRides: false });
     }
   },
@@ -129,7 +145,7 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       throw new Error("Error While Updating Ride");
-    }finally{
+    } finally {
       set({ gettingRides: false });
     }
   },
@@ -153,7 +169,7 @@ export const useRideStore = create((set, get) => ({
       socket.emit("leave-room", { rideId: rideId });
     } catch (e) {
       console.log(e);
-    }finally{
+    } finally {
       set({ gettingRides: false });
     }
   },
@@ -173,7 +189,7 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       toast.error("Error While Getting Ride Information");
-    }finally{
+    } finally {
       set({ gettingRideInfo: false });
     }
   },
@@ -200,22 +216,22 @@ export const useRideStore = create((set, get) => ({
     } catch (e) {
       console.log(e);
       toast.error("Error While Joining Ride");
-    }finally{
+    } finally {
       set({ joining: false });
     }
   },
 
-  cancelRide: async(rideId)=>{
+  cancelRide: async (rideId) => {
     const bookedRides = [...get().bookedRides];
     console.log("Ride Id: ", rideId);
-    try{
+    try {
       set({ cancelling: true });
       const response = await axiosInstance.post("/rides/cancelride", {
-        rideId: rideId
+        rideId: rideId,
       });
       console.log("Response: ", response.data);
 
-      const foundIndex = bookedRides.findIndex((ride, index)=>{
+      const foundIndex = bookedRides.findIndex((ride, index) => {
         return rideId == ride._id;
       });
       console.log("Found Index: ", foundIndex);
@@ -224,11 +240,10 @@ export const useRideStore = create((set, get) => ({
 
       set({ bookedRides: bookedRides });
 
-      toast.success("Ride Cacelled Succesfully")
-
-    }catch(e){
+      toast.success("Ride Cacelled Succesfully");
+    } catch (e) {
       console.log(e);
-    }finally{
+    } finally {
       set({ cancelling: false });
     }
   },
@@ -239,7 +254,7 @@ export const useRideStore = create((set, get) => ({
 
     console.log("Ride: ", ride);
 
-    if(user?._id == ride?.driver?._id) return true;
+    if (user?._id == ride?.driver?._id) return true;
 
     const passengers = ride?.passengers;
 
@@ -263,20 +278,20 @@ export const useRideStore = create((set, get) => ({
       set({ bookedRides: response.data.rides });
     } catch (e) {
       console.log(e);
-    }finally{
+    } finally {
       set({ gettingRides: false });
     }
   },
 
-  removePassenger: async(rideId, passengerId)=>{
+  removePassenger: async (rideId, passengerId) => {
     const driverRides = [...get().driverRides];
-    try{
+    try {
       const response = await axiosInstance.post("/rides/removepassenger", {
         rideId: rideId,
-        passengerId: passengerId
+        passengerId: passengerId,
       });
-      
-      const foundIndex = driverRides.findIndex((ride, index)=>{
+
+      const foundIndex = driverRides.findIndex((ride, index) => {
         return ride._id == rideId;
       });
 
@@ -287,8 +302,8 @@ export const useRideStore = create((set, get) => ({
       set({ driverRides: driverRides });
 
       console.log("Response: ", response.data);
-    }catch(e){
+    } catch (e) {
       console.log(e);
     }
-  }
+  },
 }));
