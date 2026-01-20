@@ -4,9 +4,11 @@ import AddRideAlertModal from "../AddRideAlertModal/AddRideAlertModal";
 import { Plus } from "lucide-react";
 import { useRideAlertStore } from "../../store/useRideAlertStore";
 import { useEffect } from "react";
+import { useSuggestionStore } from "../../store/useSuggestionStore";
 
 export default function RideAlert() {
   const { getRideAlerts, setRideAlert } = useRideAlertStore();
+  const { setPlaces } = useSuggestionStore();
 
   useEffect(() => {
     getRideAlerts();
@@ -39,6 +41,7 @@ export default function RideAlert() {
                   departureDate: "",
                   numberOfPassengers: 1,
                 });
+                setPlaces([])
               }}
               onClick={() => {
                 

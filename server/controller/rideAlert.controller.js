@@ -18,8 +18,9 @@ export const getRideAlerts = async(req, res)=>{
 
 
 export const addRideAlert = async(req, res)=>{
-    const { pickup, destination, departureDate, numberOfPassengers } = req.body;
+    const { pickup, destination, departureDate, numberOfPassengers, createAnyway } = req.body;
     try{
+        const userId = req.session.passport.user.user._id;
 
         const pickupJson = await JSON.parse(pickup);
         const destinationJson = await JSON.parse(destination);
@@ -33,7 +34,27 @@ export const addRideAlert = async(req, res)=>{
         const startDate = new Date(year, month, date, 0 ,0 ,0 , 0);
         const endDate = new Date(year, month, date, 24, 0, 0, 0);
 
+        const foundRideAlerts = await RideAlert.find({
+            user: userId,
+            "pickup.place_id" : pickupJson.place_id,
+            "destination.place_id" : destinationJson.place_id,
+            departureDate: {
+                $gte: new Date(startDate),
+                $lt: new Date(endDate)
+            },
+            numberOfPassengers: {
+                $gte: numberOfPassengers
+            }
+        });
+
+        if(foundRideAlerts.length > 0){
+            return res.status(200).json({ msg: "Ride Alert Already Exists", rideAlertAlreadyExists: true });
+        }
+
         const foundRides = await Ride.find({
+            driver: {
+                $ne: userId
+            },
             'pickup.place_id' : pickupJson.place_id,
             'destination.place_id' : destinationJson.place_id,
             departureDate: {
@@ -45,11 +66,11 @@ export const addRideAlert = async(req, res)=>{
             }
         });
 
-        if(foundRides.length > 0){
+        if(foundRides.length > 0 && !createAnyway){
             return res.status(200).json({ msg: "Match Found", matchFound: true });
         }
 
-        const userId = req.session.passport.user.user._id;
+        
         const newRide = new RideAlert({
             user: userId,
             pickup: pickupJson,

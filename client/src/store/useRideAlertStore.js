@@ -27,11 +27,13 @@ export const useRideAlertStore = create((set, get)=>({
 
     matchFound: false,
 
-    rideAlertErrorMsg: "",
-
     setRideAlert: (val)=>{
         console.log("Ride Alert Object: ", val);
         set({ rideAlert: { ...get().rideAlert, ...val } });
+    },
+
+    setMatchFound: (val)=>{
+        set({ matchFound: val });
     },
 
     getRideAlerts: async()=>{
@@ -47,7 +49,7 @@ export const useRideAlertStore = create((set, get)=>({
     },
 
 
-    addRideAlert: async()=>{
+    addRideAlert: async(createAnyway)=>{
         set({ rideAlertErrorMsg: "" });
         const { setSearchDetails } = useSuggestionStore.getState();
         const { pickup, destination, departureDate, numberOfPassengers } = get().rideAlert;
@@ -57,12 +59,17 @@ export const useRideAlertStore = create((set, get)=>({
                 pickup: JSON.stringify(pickup),
                 destination: JSON.stringify(destination),
                 departureDate: departureDate,
-                numberOfPassengers: numberOfPassengers
+                numberOfPassengers: numberOfPassengers,
+                createAnyway: createAnyway
             });
             console.log("Response: ", response.data);
 
-            if(response.data.matchFound){
-                set({ matchFound: true, rideAlertErrorMsg: "Ride Already Present" });
+            if(response.data.rideAlertAlreadyExists){
+                return toast.error("Ride Alert Already Exists");
+            }
+
+            if(response.data.matchFound && !createAnyway){
+                set({ matchFound: true });
                 setSearchDetails({
                     pickup: pickup,
                     destination: destination,
@@ -71,7 +78,6 @@ export const useRideAlertStore = create((set, get)=>({
                 })
                 return;
             }
-
             toast.success("Ride Alert Created");
         }catch(e){
             console.log(e);
