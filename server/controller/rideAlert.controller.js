@@ -112,8 +112,8 @@ export const addRideAlert = async(req, res)=>{
 export const deleteRideAlert = async(req, res)=>{
     const { rideAlertId } = req.query;
     try{
-        const deletedRide = await RideAlert.findByIdAndDelete(rideAlertId).populate('user');
-        console.log("Deleted Ride: ", deleteRideAlert);
+        const deletedRideAlert = await RideAlert.findByIdAndDelete(rideAlertId).populate('user');
+        console.log("Deleted Ride: ", deletedRideAlert);
 
         return res.status(200).json({ msg: "Deleted Ride Alert Successfully" });
     }catch(e){

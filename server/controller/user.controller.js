@@ -1,5 +1,6 @@
 import { Group } from "../models/Group.js";
 import { Message } from "../models/Message.js";
+import { RideAlert } from "../models/RideAlert.js";
 import { Ride } from "../models/Rides.js";
 import { User } from "../models/User.js";
 import { mailQueue } from "../utils/queue.js";
@@ -260,12 +261,21 @@ export const removeUser = async (req, res) => {
         {
           parentSenderName: null
         }
+      ),
+
+      // Deleting The Ride Alerts created by the user
+
+      RideAlert.deleteMany(
+        {
+          user: userId
+        }
       )
     ]);
 
     await User.findByIdAndDelete(userId);
-
+    
     console.log("Phase 2 completed")
+    
 
 
     return res.status(200).json({ msg: "User Removed Successfully" })

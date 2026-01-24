@@ -28,8 +28,12 @@ const rideAlertSchema = new Schema({
     numberOfPassengers: {
         type: Number,
         required: true
-    }
-});
+    },
+    rides: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Ride'
+    }]
+}, { timestamps: true });
 
 
 export const RideAlert = mongoose.model('RideAlert', rideAlertSchema);

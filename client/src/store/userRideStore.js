@@ -261,7 +261,7 @@ export const useRideStore = create((set, get) => ({
     console.log("Passengers: ", passengers);
 
     const foundIndex = passengers?.findIndex((passenger, index) => {
-      return passenger._id == user._id;
+      return passenger._id == user?._id;
     });
 
     console.log("Found Index: ", foundIndex);

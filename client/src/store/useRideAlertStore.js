@@ -27,6 +27,10 @@ export const useRideAlertStore = create((set, get)=>({
 
     matchFound: false,
 
+    closeMainModal: false,
+
+    loading: false,
+
     setRideAlert: (val)=>{
         console.log("Ride Alert Object: ", val);
         set({ rideAlert: { ...get().rideAlert, ...val } });
@@ -38,6 +42,7 @@ export const useRideAlertStore = create((set, get)=>({
 
     getRideAlerts: async()=>{
         try{
+            set({ loading: true });
             const response = await axiosInstance.get("/ridealerts/getridealerts");
             console.log("Response: ", response.data);
 
@@ -45,6 +50,8 @@ export const useRideAlertStore = create((set, get)=>({
         }catch(e){
             console.log(e);
             toast.error("Error While Getting Ride Alerts")
+        }finally{
+            set({ loading: false });
         }
     },
 
@@ -53,8 +60,9 @@ export const useRideAlertStore = create((set, get)=>({
         set({ rideAlertErrorMsg: "" });
         const { setSearchDetails } = useSuggestionStore.getState();
         const { pickup, destination, departureDate, numberOfPassengers } = get().rideAlert;
+        const rideAlerts = [...get().rideAlerts];
         try{
-            set({ creating: true });
+            set({ creating: true, loading: true });
             const response = await axiosInstance.post("/ridealerts/addridealert", {
                 pickup: JSON.stringify(pickup),
                 destination: JSON.stringify(destination),
@@ -78,13 +86,47 @@ export const useRideAlertStore = create((set, get)=>({
                 })
                 return;
             }
+            rideAlerts.push(response.data.rideAlert);
+            set({ closeMainModal: true, rideAlerts: rideAlerts })
             toast.success("Ride Alert Created");
         }catch(e){
             console.log(e);
             // throw new Error("Error While Adding Ride")
             toast.error("Error While Adding Ride Alert")
         }finally{
-            set({ creating: false });
+            set({ creating: false, loading: false });
+        }
+    },
+
+    deleteRideAlert: async(rideAlertId)=>{
+        const rideAlerts = [...get().rideAlerts];
+        try{
+            set({ loading: true });
+            const response = await axiosInstance.delete("/ridealerts/deleteridealert", {
+                params: {
+                    rideAlertId: rideAlertId
+                }
+            });
+
+            console.log("Response: ", response.data);
+
+            const foundIndex = rideAlerts.findIndex((rideAlert, index)=>{
+                return rideAlert._id == rideAlertId
+            });
+
+            console.log("Found Index: ", foundIndex);
+
+            rideAlerts.splice(foundIndex, 1);
+
+            console.log("Ride Alerts: ", rideAlerts);
+
+            set({ rideAlerts: rideAlerts });
+
+        }catch(e){
+            console.log(e);
+            toast.error("Error While Deleting Ride Alert")
+        }finally{
+            set({ loading: false });
         }
     }
 

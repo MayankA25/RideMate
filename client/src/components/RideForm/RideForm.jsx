@@ -59,7 +59,7 @@ export default function RideForm({ type }) {
           </label>
           <input
             type="text"
-            className="input input-primary w-full focus:outline-0"
+            className="input input-primary w-full focus:outline-0 focus:bg-base-300"
             id="leaving-from"
             placeholder="Departure Location"
             value={
@@ -156,7 +156,7 @@ export default function RideForm({ type }) {
           </label>
           <input
             type="text"
-            className="input input-primary w-full focus:outline-0"
+            className="input input-primary w-full focus:outline-0 focus:bg-base-300"
             id="going-to"
             placeholder="Arrival Location"
             value={
@@ -258,7 +258,7 @@ export default function RideForm({ type }) {
         <input
           type="date"
           id="departure-date"
-          className="input input-primary w-full focus:outline-0"
+          className="input input-primary w-full focus:outline-0 focus:bg-base-300"
           value={
             type == "search"
               ? searchDetails.departureDate
@@ -291,7 +291,7 @@ export default function RideForm({ type }) {
         </label>
         <input
           type="number"
-          className="input input-primary w-full focus:outline-0"
+          className="input input-primary w-full focus:outline-0 focus:bg-base-300"
           placeholder="Number Of Passengers"
           min={0}
           max={10}

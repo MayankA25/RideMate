@@ -4,7 +4,7 @@ import { useRideStore } from "../../store/userRideStore";
 import { useNavigate } from "react-router-dom";
 import { useSuggestionStore } from "../../store/useSuggestionStore";
 
-export default function FoundMatchModal() {
+export default function FoundMatchModal({ closeBtnRef }) {
   useEffect(()=>{
     return ()=>{
       setMatchFound(false);
@@ -35,7 +35,9 @@ export default function FoundMatchModal() {
         <div className="modal-action">
           <form method="dialog" className="flex gap-2">
             {/* if there is a button in form, it will close the modal */}
-            <button className="btn">Close</button>
+            <button className="btn" onClick={()=>{
+              closeBtnRef.current.click();
+            }}>Close</button>
             <button className="btn btn-primary" onClick={()=>{
               getAllRides();
               navigate("/dashboard/rides");
@@ -43,6 +45,7 @@ export default function FoundMatchModal() {
             }}>View Rides</button>
             <button className="btn btn-primary" onClick={()=>{
               addRideAlert(true);
+              closeBtnRef.current.click();
             }}>Add Alert</button>
           </form>
         </div>

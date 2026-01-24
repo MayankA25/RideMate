@@ -4,6 +4,7 @@ import { Group } from "../models/Group.js";
 import { mailQueue } from "../utils/queue.js";
 import { Message } from "../models/Message.js";
 import { User } from "../models/User.js";
+import { RideAlert } from "../models/RideAlert.js";
 
 export const getAllRides = async (req, res) => {
   const { pickup, destination, departureDate, seats } = req.query;
@@ -46,7 +47,7 @@ export const getAllRides = async (req, res) => {
         $lt: new Date(endDate),
       },
       driver: { $ne: req.session.passport.user.user._id },
-      availableSeats: { $gte: seats }
+      availableSeats: { $gte: seats },
     })
       .populate("driver")
       .populate("passengers")
@@ -94,9 +95,12 @@ export const addRide = async (req, res) => {
       "Pickup: ",
       pickupCoords,
       "Destination Coords: ",
-      destinationCoords
+      destinationCoords,
     );
-    if(availableSeats <= 0 || fare < 0 ) return res.status(400).json({ msg: "Error Occurred. Enter all the fields correcly." })
+    if (availableSeats <= 0 || fare < 0)
+      return res
+        .status(400)
+        .json({ msg: "Error Occurred. Enter all the fields correcly." });
     const departureTimeInMilliSeconds = new Date(departureDate).getTime();
     const currentTimeInMilliSeconds = new Date().getTime();
 
@@ -106,7 +110,7 @@ export const addRide = async (req, res) => {
     const estimatedISOString = await getEstimatedTimeOfArrival(
       new Date(departureDate).toISOString(),
       pickupCoords,
-      destinationCoords
+      destinationCoords,
     );
 
     const groupName = `${pickup.address.split(",")[0]} to ${
@@ -141,6 +145,85 @@ export const addRide = async (req, res) => {
     const foundRide = await Ride.findById(savedRide._id)
       .populate("driver")
       .populate("group");
+
+    const fullYear = new Date(departureDate).getFullYear();
+    const month = new Date(departureDate).getMonth();
+    const date = new Date(departureDate).getDate();
+
+    console.log("FY: ", fullYear, " M: ", month, " D: ", date);
+
+    const startDate = new Date(fullYear, month, date, 0, 0, 0, 0);
+    const endDate = new Date(fullYear, month, date, 24, 0, 0, 0);
+
+    const updatedRideAlerts = await RideAlert.updateMany(
+      {
+        "pickup.place_id": pickup.place_id,
+        "destination.place_id": destination.place_id,
+        departureDate: {
+          $gte: new Date(startDate),
+          $lt: new Date(endDate),
+        },
+        numberOfPassengers: {
+          $lte: availableSeats,
+        },
+      },
+      {
+        $addToSet: { rides: savedRide._id }
+      },
+    );
+
+    console.log("Updated Ride Alerts: ", updatedRideAlerts);
+
+    const rideAlertUsers = await RideAlert.find({
+      "pickup.place_id": pickup.place_id,
+      "destination.place_id": destination.place_id,
+      departureDate: {
+        $gte: new Date(startDate),
+        $lt: new Date(endDate),
+      },
+      numberOfPassengers: {
+        $lte: availableSeats,
+      },
+    })
+      .populate("user")
+      .select("user");
+
+    console.log("Ride Alert Users: ", rideAlertUsers);
+
+    const userEmails = rideAlertUsers.map((rideAlertObj) => {
+      return rideAlertObj.user.email;
+    });
+
+    console.log("User Email: ", userEmails);
+
+    const senderMail = req.session.passport.user.user.email;
+    const accessToken = req.session.passport.user.accessToken;
+    const refreshToken = req.session.passport.user.refreshToken;
+    const cc = [];
+    const bcc = [];
+
+    const subject = `Ride Alert - ${pickup.address} to ${destination.address}`;
+
+    const message = `<span style="font-weight:600">A new ride is available from <span style="font-weight-700">${pickup.address}</span> to <span style="font-weight: 700">${destination.address}</span> scheduled on <span style="font-weight:700">${new Date(departureDate).toDateString()}</span> with driver <span style="font-weight:700">${req.session.passport.user.user.firstName} ${req.session.passport.user.user.lastName} (${senderMail})</span>.
+    <br></br>
+    <br></br>
+    Kindly go to the RideMate app for more information and booking ride.
+    </span>`;
+
+    userEmails.forEach(async (email, index) => {
+      await mailQueue.add("mailQueue", {
+        senderMail,
+        recipient: email,
+        accessToken,
+        refreshToken,
+        subject,
+        message,
+        cc,
+        bcc,
+        attachment: [],
+      });
+    });
+
     return res
       .status(200)
       .json({ msg: "Ride Added Successfully", newRide: foundRide });
@@ -164,7 +247,10 @@ export const updateRide = async (req, res) => {
   const pickupCoords = [...pickup.coordinates].reverse();
   const destinationCoords = [...destination.coordinates].reverse();
 
-  if(availableSeats <= 0 || fare < 0 ) return res.status(400).json({ msg: "Error Occurred. Enter all the fields correcly." })
+  if (availableSeats <= 0 || fare < 0)
+    return res
+      .status(400)
+      .json({ msg: "Error Occurred. Enter all the fields correcly." });
 
   const foundRide = await Ride.findById(rideId)
     .populate("driver")
@@ -176,7 +262,7 @@ export const updateRide = async (req, res) => {
   const estimatedISOString = await getEstimatedTimeOfArrival(
     date,
     pickupCoords,
-    destinationCoords
+    destinationCoords,
   );
   console.log("ETA: ", estimatedISOString);
   try {
@@ -192,7 +278,7 @@ export const updateRide = async (req, res) => {
         carColor: carColor,
         availableSeats: availableSeats,
       },
-      { new: true }
+      { new: true },
     )
       .populate("driver")
       .populate("passengers")
@@ -208,7 +294,7 @@ export const updateRide = async (req, res) => {
       {
         name: newGroupName,
       },
-      { new: true }
+      { new: true },
     );
 
     const senderMail = req.session.passport.user.user.email;
@@ -221,7 +307,7 @@ export const updateRide = async (req, res) => {
     const subject = `Regarding your ride booking from ${
       foundRide.pickup.address
     } to ${foundRide.destination.address} on ${new Date(
-      foundRide.departureDate
+      foundRide.departureDate,
     ).toDateString()}`;
 
     // const message = `Your ride booking from ${foundRide.pickup.address} to ${
@@ -268,10 +354,41 @@ export const updateRide = async (req, res) => {
 export const deleteRide = async (req, res) => {
   const { rideId } = req.query;
   try {
-    const deletedRide = await Ride.findByIdAndDelete(rideId).populate('driver').populate('passengers').populate('group');
+    const deletedRide = await Ride.findByIdAndDelete(rideId)
+      .populate("driver")
+      .populate("passengers")
+      .populate("group");
     console.log("Deleted Ride: ", deletedRide);
     const deletedGroup = await Group.findByIdAndDelete(deletedRide.group);
     console.log("Deleted Group: ", deletedGroup);
+
+    const foundRides = await Ride.find({
+      "pickup.place_id" : deletedRide.pickup.place_id,
+      "destination.place_id": deletedRide.destination.place_id,
+      departureDate: new Date(deletedRide.departureDate),
+      availableSeats: {
+        $gte: deletedRide.availableSeats
+      }
+    });
+    const rideExists = foundRides.length > 0;
+    const deletedRideAlerts = await RideAlert.updateMany(
+      {
+
+      "pickup.place_id": deletedRide.pickup.place_id,
+      "destination.place_id": deletedRide.destination.place_id,
+      departureDate: new Date(deletedRide.departureDate),
+      numberOfPassengers: {
+        $gte: deletedRide.availableSeats,
+      },
+
+      },
+
+      {
+        rideExists: rideExists
+      }
+  );
+    console.log("Deleted Ride Alerts: ", deletedRideAlerts);
+
     const senderMail = req.session.passport.user.user.email;
     const accessToken = req.session.passport.user.accessToken;
     const refreshToken = req.session.passport.user.refreshToken;
@@ -286,9 +403,9 @@ export const deleteRide = async (req, res) => {
     <br></br>
     Sorry for the inconvenience caused
     </span>`;
-    if(deletedRide.passengers.length > 0){
-      deletedRide.passengers.forEach(async(passenger, index)=>{
-        await mailQueue.add('mailQueue', {
+    if (deletedRide.passengers.length > 0) {
+      deletedRide.passengers.forEach(async (passenger, index) => {
+        await mailQueue.add("mailQueue", {
           senderMail,
           recipient: passenger.email,
           accessToken,
@@ -297,9 +414,9 @@ export const deleteRide = async (req, res) => {
           message,
           cc,
           bcc,
-          attachment: []
-        })
-      })
+          attachment: [],
+        });
+      });
     }
     return res.status(200).json({ msg: "Ride Deleted Successfully" });
   } catch (e) {
@@ -351,28 +468,30 @@ export const joinRide = async (req, res) => {
 
         // $expr ---> lets to calculate so here the first condition is of finding the document which is being finded by the rideId and also the ride which has passengers.length < availableSeats;
         $expr: {
-          $lt: [ { $size: '$passengers' }, '$availableSeats' ]
-        }
+          $lt: [{ $size: "$passengers" }, "$availableSeats"],
+        },
       },
       {
         $addToSet: { passengers: userId },
-        $set: { [`passengersJoinedAt.${userId}`] : new Date() }
+        $set: { [`passengersJoinedAt.${userId}`]: new Date() },
       },
-      { new: true }
-    ).populate('driver').populate('passengers').populate('group');
-    
-    if(!updatedRide){
-      return res.status(400).json({ msg: "Ride Capacity Is Full" })
+      { new: true },
+    )
+      .populate("driver")
+      .populate("passengers")
+      .populate("group");
+
+    if (!updatedRide) {
+      return res.status(400).json({ msg: "Ride Capacity Is Full" });
     }
     const updatedGroup = await Group.findByIdAndUpdate(
       updatedRide.group._id,
       {
         $addToSet: { members: userId },
-        $set: { [`membersJoinedAt.${userId}`] : new Date() }
+        $set: { [`membersJoinedAt.${userId}`]: new Date() },
       },
-      { new: true }
+      { new: true },
     );
-
 
     console.log("Updated Ride: ", updatedRide);
     console.log("Updated Group: ", updatedGroup);
@@ -394,9 +513,9 @@ export const cancelRide = async (req, res) => {
       rideId,
       {
         $pull: { passengers: userId },
-        $unset: { [`passengersJoinedAt.${userId}`] : "" }
+        $unset: { [`passengersJoinedAt.${userId}`]: "" },
       },
-      { new: true }
+      { new: true },
     )
       .populate("driver")
       .populate("passengers")
@@ -407,9 +526,9 @@ export const cancelRide = async (req, res) => {
       updatedRide.group._id,
       {
         $pull: { members: userId },
-        $unset: { [`membersJoinedAt.${userId}`] : '' }
+        $unset: { [`membersJoinedAt.${userId}`]: "" },
       },
-      { new: true }
+      { new: true },
     );
 
     console.log("Updated Group: ", updatedGroup);
@@ -425,7 +544,7 @@ export const cancelRide = async (req, res) => {
     //   await Message.findByIdAndUpdate(message._id, {
     //     sender: [...Array(24)].map(()=>"d").join('')
     //   })
-    //   const parentMessages = await Message.find({ 
+    //   const parentMessages = await Message.find({
     //     parentId: message._id
     //    });
     //    console.log("Parent Messages: ", parentMessages);
@@ -435,30 +554,25 @@ export const cancelRide = async (req, res) => {
     //     })
     //    })
 
-    
     const parentIds = await Message.distinct("_id", {
       sender: userId,
-      group: updatedGroup._id
+      group: updatedGroup._id,
     });
 
     console.log("Parent Ids: ", parentIds);
 
     await Promise.all([
-
       // In the first condition i am find the documents using "$in" which checks whether document id is present in an array or not
 
       // In the second part i am updating sender
-      Message.updateMany(
-        { _id: { $in: parentIds } },
-        { sender: null }
-      ),
+      Message.updateMany({ _id: { $in: parentIds } }, { sender: null }),
 
       // Now same in the first part i am filtering the messages which are present in the parentIds array and in second part i am updating the parentSenderName
       Message.updateMany(
         { parentId: { $in: parentIds } },
-        { parentSenderName: null }
-      )
-    ])
+        { parentSenderName: null },
+      ),
+    ]);
 
     return res
       .status(200)
@@ -502,43 +616,47 @@ export const getBookedRides = async (req, res) => {
   }
 };
 
-
-export const getUserRides = async(req, res)=>{
+export const getUserRides = async (req, res) => {
   const { userId } = req.query;
-  try{
+  try {
     const rides = await Ride.find({
-      driver: userId
-    }).populate('driver').populate('passengers').populate('group');
+      driver: userId,
+    })
+      .populate("driver")
+      .populate("passengers")
+      .populate("group");
     console.log("Rides: ", rides);
 
     return res.status(200).json({ rides: rides });
-  }catch(e){
+  } catch (e) {
     console.log(e);
-    return res.status(500).json({ msg:"Internal Server Error" })
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
-}
+};
 
-
-export const removeRide = async(req, res)=>{
+export const removeRide = async (req, res) => {
   const { rideId } = req.query;
 
-  try{
-    const foundRide = await Ride.findById(rideId).populate('driver').populate('passengers').populate('group');
+  try {
+    const foundRide = await Ride.findById(rideId)
+      .populate("driver")
+      .populate("passengers")
+      .populate("group");
 
-
-    if(!foundRide) throw new Error("Ride Not Found")
+    if (!foundRide) throw new Error("Ride Not Found");
 
     console.log("Found Ride: ", foundRide);
 
-    await Message.deleteMany(
-      { group: foundRide.group._id }
-    )
+    await Message.deleteMany({ group: foundRide.group._id });
+    console.log("Deleted Messages.");
     const deletedGroup = await Group.findByIdAndDelete(foundRide.group._id);
     console.log("Deleted Group: ", deletedGroup);
 
-    const removedRide = await Ride.findByIdAndDelete(rideId).populate('driver').populate('passengers').populate('group');
+    const removedRide = await Ride.findByIdAndDelete(rideId)
+      .populate("driver")
+      .populate("passengers")
+      .populate("group");
     console.log("Removed Ride: ", removedRide);
-
 
     // const groupMessages = await Message.find({ group: removedRide.group._id });
 
@@ -546,8 +664,36 @@ export const removeRide = async(req, res)=>{
     //   await Message.findByIdAndDelete(message._id);
     // })
 
+    const date = new Date(removedRide.departureDate);
 
-    console.log("Deleted Messages.");
+    const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+    const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 24, 0, 0, 0);
+
+    const foundRideAlertsIds = await RideAlert.distinct("_id", {
+      "pickup.place_id": removedRide.pickup.place_id,
+      "destination.place_id": removedRide.destination.place_id,
+      departureDate: {
+        $gte: new Date(startDate),
+        $lt: new Date(endDate)
+      },
+      rides: rideId
+    });
+
+    console.log("Found Ride Alerts: ", foundRideAlertsIds);
+
+
+    const updatedRideAlerts = await RideAlert.updateMany(
+      {
+        _id: { $in: foundRideAlertsIds }
+      },
+      {
+        $pull: {
+          rides: rideId
+        }
+      }
+    )
+    
+
 
     const senderMail = req.session.passport.user.user.email;
     const accessToken = req.session.passport.user.accessToken;
@@ -563,11 +709,12 @@ export const removeRide = async(req, res)=>{
     <br></br>
     Sorry for the inconvenience caused
     </span>`;
-    const passengers = [ ...removedRide.passengers ];
-    if(foundRide.driver._id != req.session.passport.user.user._id) passengers.push(req.session.passport.user.user);
-    if(passengers.length > 0){
-      passengers.forEach(async(passenger, index)=>{
-        await mailQueue.add('mailQueue', {
+    const passengers = [...removedRide.passengers];
+    if (foundRide.driver._id != req.session.passport.user.user._id)
+      passengers.push(req.session.passport.user.user);
+    if (passengers.length > 0) {
+      passengers.forEach(async (passenger, index) => {
+        await mailQueue.add("mailQueue", {
           senderMail,
           recipient: passenger.email,
           accessToken,
@@ -576,46 +723,56 @@ export const removeRide = async(req, res)=>{
           message,
           cc,
           bcc,
-          attachment: []
-        })
-      })
+          attachment: [],
+        });
+      });
     }
-    
-    return res.status(200).json({ msg: "Ride Removed Successfully" })
 
-  }catch(e){
+    return res.status(200).json({ msg: "Ride Removed Successfully" });
+  } catch (e) {
     console.log(e);
-    return res.status(500).json({ msg: "Internal Server Error" })
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
-}
+};
 
-export const removePassenger = async(req, res)=>{
+export const removePassenger = async (req, res) => {
   const { rideId, passengerId } = req.body;
-  try{
+  try {
     const foundRide = await Ride.findById(rideId);
-    if(!foundRide) return res.status(400).json({ msg: "Ride Not Found" });
-    
+    if (!foundRide) return res.status(400).json({ msg: "Ride Not Found" });
+
     // const deletedMessages = await Message.deleteMany(
     //   { group: foundRide.group }
     // );
 
-    const updatedRide = await Ride.findByIdAndUpdate(rideId, {
-      $pull: { passengers: passengerId },
-      $unset: { [`passengersJoinedAt.${passengerId}`] : '' }
-    }, { new: true }).populate('driver').populate('passengers').populate('group')
+    const updatedRide = await Ride.findByIdAndUpdate(
+      rideId,
+      {
+        $pull: { passengers: passengerId },
+        $unset: { [`passengersJoinedAt.${passengerId}`]: "" },
+      },
+      { new: true },
+    )
+      .populate("driver")
+      .populate("passengers")
+      .populate("group");
 
     console.log("Deleted Ride: ", updatedRide);
 
-    const updatedGroup = await Group.findByIdAndUpdate(updatedRide.group._id, {
-      $pull: { members: passengerId },
-      $unset: { [`membersJoinedAt.${passengerId}`] : "" }
-    }, { new: true }).populate('members');
+    const updatedGroup = await Group.findByIdAndUpdate(
+      updatedRide.group._id,
+      {
+        $pull: { members: passengerId },
+        $unset: { [`membersJoinedAt.${passengerId}`]: "" },
+      },
+      { new: true },
+    ).populate("members");
 
     console.log("Updated Group: ", updatedGroup);
 
     const parentIds = await Message.distinct("_id", {
       sender: passengerId,
-       group: foundRide.group
+      group: foundRide.group,
     });
 
     console.log("Parent IDs: ", parentIds);
@@ -623,27 +780,30 @@ export const removePassenger = async(req, res)=>{
     await Promise.all([
       await Message.updateMany(
         {
-           _id: { $in: parentIds } 
+          _id: { $in: parentIds },
         },
         {
-          sender: null
-        }
+          sender: null,
+        },
       ),
 
       await Message.updateMany(
-        { 
-          parentId: { $in: parentIds } 
+        {
+          parentId: { $in: parentIds },
         },
         {
-          parentSenderName: null
-        }
-      )
+          parentSenderName: null,
+        },
+      ),
     ]);
 
-    const isUserMember = await Group.exists({ _id: updatedGroup._id, members: passengerId });
+    const isUserMember = await Group.exists({
+      _id: updatedGroup._id,
+      members: passengerId,
+    });
     console.log("Is User Member: ", isUserMember);
 
-    const foundUser = await User.findById(passengerId).select('email');
+    const foundUser = await User.findById(passengerId).select("email");
 
     const userId = req.session.passport.user.user._id;
 
@@ -663,8 +823,8 @@ export const removePassenger = async(req, res)=>{
     <br></br>
     Sorry for the inconvenience caused
     </span>`;
-    
-    await mailQueue.add('mailQueue', {
+
+    await mailQueue.add("mailQueue", {
       senderMail: senderMail,
       recipient: recipientMail,
       accessToken: accessToken,
@@ -673,13 +833,14 @@ export const removePassenger = async(req, res)=>{
       message: message,
       cc: cc,
       bcc: bcc,
-      attachment: {}
-    })
+      attachment: {},
+    });
 
-    return res.status(200).json({ msg: "Passenger Removed Successfully", ride: updatedRide })
-
-  }catch(e){
+    return res
+      .status(200)
+      .json({ msg: "Passenger Removed Successfully", ride: updatedRide });
+  } catch (e) {
     console.log(e);
-    return res.status(500).json({ msg: "Internal Server Error" })
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
-}
+};

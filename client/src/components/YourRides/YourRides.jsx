@@ -101,7 +101,7 @@ export default function YourRides() {
                       pickup={ride.pickup.address}
                       destination={ride.destination.address}
                       departureDate={new Date(
-                        ride.departureDate
+                        ride.departureDate,
                       ).toDateString()}
                     />
                     <PassengersModal
@@ -114,13 +114,18 @@ export default function YourRides() {
                       {new Date(ride.createdAt).toDateString()},{" "}
                       {`${new Date(ride.createdAt).getHours()}`.padStart(
                         2,
-                        "0"
+                        "0",
                       )}
                       :
                       {`${new Date(ride.createdAt).getMinutes()}`.padStart(
                         2,
-                        "0"
+                        "0",
                       )}
+                    </div>
+                    <div className="flex items-center py-2 absolute top-0 gap-1.5">
+                      <div className="p-1.5 bg-red-400 rounded-full hover:scale-112 transition-all"></div>
+                      <div className="p-1.5 bg-yellow-400 rounded-full hover:scale-112 transition-all"></div>
+                      <div className="p-1.5 bg-green-400 rounded-full hover:scale-112 transition-all"></div>
                     </div>
                     <div className="grid grid-cols-4 w-full pt-5">
                       <div
@@ -198,7 +203,7 @@ export default function YourRides() {
                               pickup: ride.pickup,
                               destination: ride.destination,
                               departureDate: getFormattedDate(
-                                ride.departureDate
+                                ride.departureDate,
                               ),
                               carName: ride.carName,
                               carColor: ride.carColor,
@@ -229,7 +234,7 @@ export default function YourRides() {
                           onClick={() => {
                             document
                               .getElementById(
-                                `my_ride_deletion_confirmation_modal_${index}`
+                                `my_ride_deletion_confirmation_modal_${index}`,
                               )
                               .showModal();
                           }}

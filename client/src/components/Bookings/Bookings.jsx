@@ -62,6 +62,11 @@ export default function Bookings() {
                   />
                   {/* <RideBookingConfirmation index={index} pickup={ride.pickup.address} destination={ride.destination.address} rideId={ride._id} /> */}
                   <div className="flex items-center justify-center font-semibold text-sm py-1 bg-base-300 absolute top-0 w-full left-0 rounded-t-xl"><span className="font-bold mx-2">Joined At:</span> { new Date(ride.passengersJoinedAt[`${user._id}`]).toDateString() }, { `${new Date(ride.passengersJoinedAt[`${user._id}`]).getHours()}`.padStart(2, "0") }:{ `${new Date(ride.passengersJoinedAt[`${user._id}`]).getMinutes()}`.padStart(2, "0") }</div>
+                  <div className="flex items-center py-2 absolute top-0 gap-1.5">
+                      <div className="p-1.5 bg-red-400 rounded-full hover:scale-112 transition-all"></div>
+                      <div className="p-1.5 bg-yellow-400 rounded-full hover:scale-112 transition-all"></div>
+                      <div className="p-1.5 bg-green-400 rounded-full hover:scale-112 transition-all"></div>
+                    </div>
                   <div className="grid grid-cols-4 w-full pt-2">
                     <div
                       className="flex items-center p-5 py-8 gap-10 pl-15 cursor-pointer"

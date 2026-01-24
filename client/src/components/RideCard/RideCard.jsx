@@ -7,17 +7,17 @@ import { useUserStore } from "../../store/useUserStore";
 import useChatStore from "../../store/useChatStore";
 
 export default function RideCard({ ride, index }) {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const { rides, getAllRides, joinRide, checkIfUserIsPassenger, joining } =
-        useRideStore();
+  const { rides, getAllRides, joinRide, checkIfUserIsPassenger, joining } =
+    useRideStore();
 
-    const { removeRide } = useUserStore();
-    const { getSelectedGroup } = useChatStore();
+  const { removeRide } = useUserStore();
+  const { getSelectedGroup } = useChatStore();
 
-    const params = useParams();
-    const splittedParams = params['*'].split("/");
-    console.log("Params: ", splittedParams);
+  const params = useParams();
+  const splittedParams = params["*"].split("/");
+  console.log("Params: ", splittedParams);
   return (
     <div
       key={index}
@@ -31,7 +31,17 @@ export default function RideCard({ ride, index }) {
         rideId={ride._id}
         number={0}
       />
-      <div className="flex items-center justify-center font-semibold text-sm py-1 bg-base-300 absolute top-0 w-full left-0 rounded-t-xl"><span className="font-bold mx-2">Published At:</span> { new Date(ride.createdAt).toDateString() }, { `${new Date(ride.createdAt).getHours()}`.padStart(2, "0") }:{ `${new Date(ride.createdAt).getMinutes()}`.padStart(2, "0") }</div>
+      <div className="flex items-center justify-center font-semibold text-sm py-1 bg-base-300 absolute top-0 w-full left-0 rounded-t-xl">
+        <span className="font-bold mx-2">Published At:</span>{" "}
+        {new Date(ride.createdAt).toDateString()},{" "}
+        {`${new Date(ride.createdAt).getHours()}`.padStart(2, "0")}:
+        {`${new Date(ride.createdAt).getMinutes()}`.padStart(2, "0")}
+      </div>
+      <div className="flex items-center py-2 absolute top-0 gap-1.5">
+        <div className="p-1.5 bg-red-400 rounded-full hover:scale-112 transition-all"></div>
+        <div className="p-1.5 bg-yellow-400 rounded-full hover:scale-112 transition-all"></div>
+        <div className="p-1.5 bg-green-400 rounded-full hover:scale-112 transition-all"></div>
+      </div>
       <div className="grid grid-cols-4 w-full pt-5">
         <div
           className="flex items-center p-5 py-8 gap-10 pl-15 cursor-pointer"
@@ -90,13 +100,25 @@ export default function RideCard({ ride, index }) {
         </div>
         <div className="flex flex-col justify-center gap-3 p-3">
           {params?.id && (
-            <button className="btn btn-primary text-white font-bold" onClick={()=>{
-              navigate(`/dashboard/chat/${ride._id}`);
-              getSelectedGroup(ride.group._id);
-            }}><span><MessageCircle className="size-5"/></span>View Chat</button>
+            <button
+              className="btn btn-primary text-white font-bold"
+              onClick={() => {
+                navigate(`/dashboard/chat/${ride._id}`);
+                getSelectedGroup(ride.group._id);
+              }}
+            >
+              <span>
+                <MessageCircle className="size-5" />
+              </span>
+              View Chat
+            </button>
           )}
           <button
-            disabled={ride?.passengers.length >= ride?.availableSeats || checkIfUserIsPassenger(ride) || joining}
+            disabled={
+              ride?.passengers.length >= ride?.availableSeats ||
+              checkIfUserIsPassenger(ride) ||
+              joining
+            }
             className="btn btn-primary font-bold"
             onClick={() => {
               document
@@ -104,13 +126,28 @@ export default function RideCard({ ride, index }) {
                 .showModal();
             }}
           >
-            {ride?.passengers.length < ride?.availableSeats && <User className="size-5" />}
-            { (ride.passengers.length >= ride.availableSeats && !checkIfUserIsPassenger(ride)) ? "Full" : (checkIfUserIsPassenger(ride) ? "Booked" : "Book Now")}
+            {ride?.passengers.length < ride?.availableSeats && (
+              <User className="size-5" />
+            )}
+            {ride.passengers.length >= ride.availableSeats &&
+            !checkIfUserIsPassenger(ride)
+              ? "Full"
+              : checkIfUserIsPassenger(ride)
+                ? "Booked"
+                : "Book Now"}
           </button>
           {params?.id && (
-            <button className="btn btn-error text-white font-bold" onClick={()=>{
-                removeRide(ride._id)
-            }}><span><X className="size-5"/></span>Remove Ride</button>
+            <button
+              className="btn btn-error text-white font-bold"
+              onClick={() => {
+                removeRide(ride._id);
+              }}
+            >
+              <span>
+                <X className="size-5" />
+              </span>
+              Remove Ride
+            </button>
           )}
         </div>
       </div>

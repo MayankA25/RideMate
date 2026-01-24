@@ -74,7 +74,13 @@ export default function AddRideModal({ index, id }) {
       return val;
   }
   return (
-    <dialog id={`my_add_ride_modal_${index}`} className="modal">
+    <dialog id={`my_add_ride_modal_${index}`} className="modal" onClick={(event)=>{
+      const excludeIds = ['pickup', 'destination'];
+
+      if(!excludeIds.includes(event.target.id)){
+        setPlaces([]);
+      }
+    }}>
       <div className="modal-box">
         <h3 className="font-bold text-lg">{edit ? "Edit Ride" : "Add Ride"}</h3>
         <div className="flex flex-col justify-center py-4 gap-3">

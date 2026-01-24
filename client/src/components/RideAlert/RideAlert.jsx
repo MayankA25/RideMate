@@ -5,9 +5,11 @@ import { Plus } from "lucide-react";
 import { useRideAlertStore } from "../../store/useRideAlertStore";
 import { useEffect } from "react";
 import { useSuggestionStore } from "../../store/useSuggestionStore";
+import RideAlertItem from "../RideAlertItem/RideAlertItem";
+import RideAlertItemSkeleton from "../RideAlertItemSkeleton/RideAlertItemSkeleton";
 
 export default function RideAlert() {
-  const { getRideAlerts, setRideAlert } = useRideAlertStore();
+  const { getRideAlerts, setRideAlert, loading, rideAlerts } = useRideAlertStore();
   const { setPlaces } = useSuggestionStore();
 
   useEffect(() => {
@@ -53,7 +55,17 @@ export default function RideAlert() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-5"></div>
+        <div className="flex flex-col gap-5 py-5">
+          { loading ? [...Array(10)].map((_, index)=>{
+            return (
+              <RideAlertItemSkeleton key={index}/>
+            )
+          }) :  rideAlerts.map((rideAlert, index)=>{
+            return (
+              <RideAlertItem key={index} rideAlert={rideAlert}/>
+            )
+          })}
+        </div>
       </div>
     </div>
   );
