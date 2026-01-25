@@ -5,6 +5,7 @@ import { mailQueue } from "../utils/queue.js";
 import { Message } from "../models/Message.js";
 import { User } from "../models/User.js";
 import { RideAlert } from "../models/RideAlert.js";
+import { io } from "../utils/socket.js";
 
 export const getAllRides = async (req, res) => {
   const { pickup, destination, departureDate, seats } = req.query;
@@ -168,7 +169,7 @@ export const addRide = async (req, res) => {
         },
       },
       {
-        $addToSet: { rides: savedRide._id }
+        $addToSet: { rides: savedRide._id },
       },
     );
 
@@ -363,30 +364,28 @@ export const deleteRide = async (req, res) => {
     console.log("Deleted Group: ", deletedGroup);
 
     const foundRides = await Ride.find({
-      "pickup.place_id" : deletedRide.pickup.place_id,
+      "pickup.place_id": deletedRide.pickup.place_id,
       "destination.place_id": deletedRide.destination.place_id,
       departureDate: new Date(deletedRide.departureDate),
       availableSeats: {
-        $gte: deletedRide.availableSeats
-      }
+        $gte: deletedRide.availableSeats,
+      },
     });
     const rideExists = foundRides.length > 0;
     const deletedRideAlerts = await RideAlert.updateMany(
       {
-
-      "pickup.place_id": deletedRide.pickup.place_id,
-      "destination.place_id": deletedRide.destination.place_id,
-      departureDate: new Date(deletedRide.departureDate),
-      numberOfPassengers: {
-        $gte: deletedRide.availableSeats,
-      },
-
+        "pickup.place_id": deletedRide.pickup.place_id,
+        "destination.place_id": deletedRide.destination.place_id,
+        departureDate: new Date(deletedRide.departureDate),
+        numberOfPassengers: {
+          $gte: deletedRide.availableSeats,
+        },
       },
 
       {
-        rideExists: rideExists
-      }
-  );
+        rideExists: rideExists,
+      },
+    );
     console.log("Deleted Ride Alerts: ", deletedRideAlerts);
 
     const senderMail = req.session.passport.user.user.email;
@@ -666,34 +665,47 @@ export const removeRide = async (req, res) => {
 
     const date = new Date(removedRide.departureDate);
 
-    const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
-    const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 24, 0, 0, 0);
+    const startDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      0,
+      0,
+      0,
+      0,
+    );
+    const endDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      24,
+      0,
+      0,
+      0,
+    );
 
     const foundRideAlertsIds = await RideAlert.distinct("_id", {
       "pickup.place_id": removedRide.pickup.place_id,
       "destination.place_id": removedRide.destination.place_id,
       departureDate: {
         $gte: new Date(startDate),
-        $lt: new Date(endDate)
+        $lt: new Date(endDate),
       },
-      rides: rideId
+      rides: rideId,
     });
 
     console.log("Found Ride Alerts: ", foundRideAlertsIds);
 
-
     const updatedRideAlerts = await RideAlert.updateMany(
       {
-        _id: { $in: foundRideAlertsIds }
+        _id: { $in: foundRideAlertsIds },
       },
       {
         $pull: {
-          rides: rideId
-        }
-      }
-    )
-    
-
+          rides: rideId,
+        },
+      },
+    );
 
     const senderMail = req.session.passport.user.user.email;
     const accessToken = req.session.passport.user.accessToken;
@@ -839,6 +851,73 @@ export const removePassenger = async (req, res) => {
     return res
       .status(200)
       .json({ msg: "Passenger Removed Successfully", ride: updatedRide });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
+
+export const shareLiveCoordinates = async (req, res) => {
+  const { rideId, liveCoords } = req.body;
+  try {
+    const foundRide = await Ride.findById(rideId).populate('driver').populate('passengers').populate('group');
+    const userId = req.session.passport.user.user._id;
+
+    if(foundRide.driver._id != userId){
+      return res.status(400).json({ msg: "Only Driver Is Allowed To Share Live Location" })
+    }
+
+    if(!foundRide.isLiveTrackingEnabled){
+      return res.status(400).json({ msg: "Live Tracking of Ride has not been enabled by driver." })
+    }
+
+    console.log("Live Coords: ", liveCoords);
+
+    io.to(`map-${rideId}`).emit("liveCoords", liveCoords);
+
+    return res
+      .status(200)
+      .json({ msg: "Current Location Shared", liveCoords: liveCoords });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
+
+export const toggleLIveTracking = async (req, res) => {
+  const { rideId } = req.body;
+  try {
+    const foundRide = await Ride.findById(rideId);
+    if (!foundRide) return res.status(400).json({ msg: "Ride Not Found" });
+
+    const isLiveTrackingEnabled = !foundRide.isLiveTrackingEnabled;
+
+    // if(isLiveTrackingEnabled){
+
+    //   const departureDate = foundRide.departureDate;
+
+    //   if(new Date().getTime() < (new Date(departureDate).getTime() - 1 * 60 * 60 * 1000)){
+    //     return res.status(400).json({ msg: "Live Tracking will be enabled 1 hour before Ride Time" })
+    //   }
+
+    // }
+
+    const updatedRide = await Ride.findByIdAndUpdate(
+      rideId,
+      {
+        isLiveTrackingEnabled: isLiveTrackingEnabled,
+      },
+      { new: true },
+    )
+      .populate("driver")
+      .populate("passengers")
+      .populate("group");
+
+    console.log("Updated Ride: ", updatedRide);
+
+    return res
+      .status(200)
+      .json({ msg: "Live Tracking Enabled", ride: updatedRide });
   } catch (e) {
     console.log(e);
     return res.status(500).json({ msg: "Internal Server Error" });

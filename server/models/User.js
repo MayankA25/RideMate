@@ -59,6 +59,10 @@ const userSchema = new Schema({
     gender: {
         type: String,
         enums: ["Male", "Female", "Other"]
+    },
+    isBanned: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

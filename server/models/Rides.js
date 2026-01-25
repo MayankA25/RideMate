@@ -56,6 +56,10 @@ const rideSchema = new Schema({
     group: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Group'
+    },
+    isLiveTrackingEnabled: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

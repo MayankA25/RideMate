@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import UserDocumentOpenModal from "../UserDocumentOpenModal/UserDocumentOpenModal";
 import { useUserStore } from "../../store/useUserStore";
 import RemoveUserConfirmation from "../RmoveUserConfirmation/RemoveUserConfirmation";
+import BanUserConfirmation from "../BanUserConfirmation/BanUserConfirmation";
 
 export default function UserItem({ specificUser, index }) {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function UserItem({ specificUser, index }) {
         userId={specificUser._id}
       />
       <RemoveUserConfirmation index={index} user={specificUser} />
+      <BanUserConfirmation index={index} user={specificUser} />
       <div
         className="flex items-center justify-between hover:bg-white/5 cursor-pointer transition-all py-5 px-4 rounded-lg"
         onClick={() => {
@@ -107,7 +109,9 @@ export default function UserItem({ specificUser, index }) {
           // removeUser(specificUser._id);
           document.getElementById(`my_remove_user_modal_${index}`).showModal();
         }}>Remove</button>
-        <button className="btn btn-error text-white font-bold">Ban Permanently</button>
+        <button className="btn btn-error text-white font-bold" onClick={()=>{
+          document.getElementById(`my_ban_user_modal_${index}`).showModal()
+        }}>Ban Permanently</button>
       </div>
     </div>
   );

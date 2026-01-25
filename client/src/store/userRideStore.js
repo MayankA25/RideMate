@@ -306,4 +306,30 @@ export const useRideStore = create((set, get) => ({
       console.log(e);
     }
   },
+  enableLiveLocation: async(rideId)=>{
+    const { socket } = useAuthStore();
+    try{
+      socket.emit("join-room")
+    }catch(e){
+      console.log(e);
+    }
+  },
+
+  toggleLiveTracking: async(rideId)=>{
+    const rides = [...get().driverRides];
+    try{
+      const response = await axiosInstance.post("/rides/togglelivetracking", {
+        rideId: rideId
+      });
+      console.log("Response: ", response.data);
+      const foundIndex = rides.findIndex((ride, index)=>ride._id == rideId);
+      console.log("Found Index: ", foundIndex);
+      rides.splice(foundIndex, 1, response.data.ride);
+      set({ driverRides: rides, selectedRide: response.data.ride });
+      toast.success(`${response.data.ride.isLiveTrackingEnabled ? "Enabled" : "Disabled"} Live Tracking`)
+    }catch(e){
+      console.log(e);
+      return toast.error(e.response.data.msg)
+    }
+  }
 }));

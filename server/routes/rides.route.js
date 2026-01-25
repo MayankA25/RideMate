@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addRide, cancelRide, deleteRide, getAllRides, getBookedRides, getDriverRides, getRideInfo, getUserRides, joinRide, removePassenger, removeRide, updateRide } from "../controller/rides.controller.js";
+import { addRide, cancelRide, deleteRide, getAllRides, getBookedRides, getDriverRides, getRideInfo, getUserRides, joinRide, removePassenger, removeRide, shareLiveCoordinates, toggleLIveTracking, updateRide } from "../controller/rides.controller.js";
 import { verifyAdminToken } from "../middleware/middleware.admin.js";
 import { verifyToken } from "../middleware/middleware.js";
 
@@ -17,5 +17,7 @@ rideRouter.get("/getbookedrides", verifyToken, getBookedRides);
 rideRouter.get("/getuserrides", verifyAdminToken, getUserRides)
 rideRouter.delete("/removeride", verifyToken, removeRide);
 rideRouter.post("/removepassenger", verifyToken, removePassenger);
+rideRouter.post("/sharelivelocation", verifyToken, shareLiveCoordinates)
+rideRouter.post("/togglelivetracking", verifyToken, toggleLIveTracking)
 
 export default rideRouter;

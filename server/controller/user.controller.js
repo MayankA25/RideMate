@@ -187,7 +187,7 @@ export const getUsers = async (req, res) => {
 // }
 
 export const removeUser = async (req, res) => {
-  const { userId } = req.query;
+  const { userId, deletePermanently } = req.query;
   try {
     const foundUser = await User.findById(userId);
     if (!foundUser) return res.status(400).json({ msg: "User Not Found" });
@@ -272,7 +272,14 @@ export const removeUser = async (req, res) => {
       )
     ]);
 
-    await User.findByIdAndDelete(userId);
+    if(deletePermanently){
+      await User.findByIdAndUpdate(userId, {
+        isBanned: true
+      })
+    }
+    else{
+      await User.findByIdAndDelete(userId);
+    }
     
     console.log("Phase 2 completed")
     

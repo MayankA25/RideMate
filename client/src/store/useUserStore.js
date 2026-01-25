@@ -102,13 +102,14 @@ export const useUserStore = create((set, get)=>({
         set({ allUsers: filteredUsers })
     },
 
-    removeUser: async(userId)=>{
+    removeUser: async(userId, deletePermanently)=>{
         const allUsers = [...get().allUsers];
         try{
             set({ loading: true })
             const response = await axiosInstance.delete("/users/removeuser", {
                 params: {
-                    userId: userId
+                    userId: userId,
+                    deletePermanently: deletePermanently
                 }
             });
             console.log("Response: ", response.data);

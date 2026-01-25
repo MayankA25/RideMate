@@ -18,6 +18,7 @@ import "./Map.css";
 import pickupPin from "/pickup_marker.png";
 import { useParams } from "react-router-dom";
 import { useRideStore } from "../../store/userRideStore";
+import { useAuthStore } from "../../store/useAuthStore";
 
 
 function RecenterMap({ coords }) {
@@ -36,6 +37,7 @@ function RecenterMap({ coords }) {
 }
 
 function Route({ waypoints, color = "red" }) {
+  const { isLiveTrackingEnabled } = useMapStore();
   const map = useMap();
 
   useEffect(() => {
@@ -64,18 +66,27 @@ function Route({ waypoints, color = "red" }) {
       waypoints: waypoints.map(([lat, lng]) => L.latLng(lat, lng)),
       createMarker: function(i, wp, nwps){
         let icon;
-        if(i == 0){
-          icon = L.icon({
-            iconUrl: '/pickup_marker.png',
-            iconSize: [70, 70],
-            iconAnchor: [35, 50]
-          }) 
-        }else if(i == nwps-1){
+        if(i == nwps-1){
           icon = L.icon({
             iconUrl: "/destination_marker.png",
             iconSize: [100, 100],
             iconAnchor: [50, 80]
           })
+        }
+        else if(i == 1){
+          if(!isLiveTrackingEnabled) return;
+          icon = L.icon({
+            iconUrl: "/car_marker.png",
+            iconSize: [60, 50],
+            iconAnchor: [0, 20]
+          })
+        }
+        else{
+          icon = L.icon({
+            iconUrl: '/pickup_marker.png',
+            iconSize: [100, 100],
+            iconAnchor: [50, 50]
+          }) 
         }
 
         return L.marker(wp.latLng, { icon })
@@ -83,6 +94,7 @@ function Route({ waypoints, color = "red" }) {
       lineOptions: { styles: [{ color: color, weight: 3 }] },
       routeWhileDragging: false,
       show: false,
+      useHints: false
     }).addTo(map);
 
     return () => {
@@ -105,6 +117,7 @@ export default function Map() {
       positionOptions: {
         enableHighAccuracy: true,
       },
+      watchPosition: true,
       userDecisionTimeout: 5000,
     });
 
@@ -116,7 +129,8 @@ export default function Map() {
   // const start = [23.2599, 77.4126]; // Start
   // const [end, setEnd] = useState([28.6139, 77.209]);
 
-  const { startCoords, endCoords, getRideCoordinates, loadingMap } = useMapStore();
+  const { startCoords, endCoords, getRideCoordinates, loadingMap, driverCoords, shareLiveCoordinates, subscribeToLiveLocation, unsubscribeToLiveLocation, isUserPassenger, leaveLiveLocationRoom, joinLiveLocationRoom, isUserDriver } = useMapStore();
+  const { authenticated, socket } = useAuthStore();
 
 
   //   const route = [
@@ -161,18 +175,71 @@ export default function Map() {
       lng: endCoords[1],
     });
   }, [startCoords, endCoords]);
-  
+
   useEffect(()=>{
     toast.promise(async()=>{
-      await getRideCoordinates(params.id);
+      await getRideCoordinates(params?.id);
     }, {
       loading: "Routing",
       success: "Done",
-      error: "Failed To Route"
-    })
-  }, [])
-  
+      error: "Failed To Find a Route"
+    });
 
+    // return ()=>{
+    //   unsubscribeToLiveLocation();
+    //   leaveLiveLocationRoom(params?.id)
+    // }
+  }, [authenticated])
+  
+  useEffect(()=>{
+    // toast.promise(async()=>{
+    //   await getRideCoordinates(params?.id);
+    // }, {
+    //   loading: "Routing",
+    //   success: "Done",
+    //   error: "Failed To Find a Route"
+    // joinLiveLocationRoom(params?.id);
+    // });
+
+    return ()=>{
+      unsubscribeToLiveLocation();
+      leaveLiveLocationRoom(params?.id)
+    }
+  }, []);
+
+  useEffect(()=>{
+    subscribeToLiveLocation()
+  }, [socket])
+
+  useEffect(()=>{
+    if(socket){
+      joinLiveLocationRoom(params?.id)
+    }
+  }, [socket])
+  
+  useEffect(()=>{
+
+    console.log("Is User Driver: ", isUserDriver)
+
+    if(!isUserDriver){
+      console.log("User is not a driver to share location")
+      return;
+    }
+
+    console.log("Coords: ", coords);
+    console.log("Is Geolocation Enabled", isGeolocationEnabled);
+    console.log("Is Geolocation Available", isGeolocationAvailable);
+
+    if(!isGeolocationEnabled){
+      return toast.error("Location Not Enabled")
+    }
+    if(!isGeolocationAvailable){
+      return toast.error("Live Location Not Available")
+    }
+    if(authenticated && coords && isUserDriver){
+      shareLiveCoordinates(params.id, coords);
+    }
+  }, [coords, isUserDriver])
 
   return (
     <>
@@ -195,7 +262,7 @@ export default function Map() {
             {userCoords && <RecenterMap coords={userCoords} />}
 
             {/* <RoutingMachine start={start} end={end} /> */}
-            <Route waypoints={[startCoords, endCoords]} />
+            <Route waypoints={[startCoords, driverCoords, endCoords]} />
           </MapContainer>
         )}
     </>

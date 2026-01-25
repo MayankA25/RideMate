@@ -42,7 +42,7 @@ io.on("connection", (socket)=>{
         console.log("An User Disconnected: ", socket.id)
     });
 
-    socket.on("join-room", async ({ rideId })=>{
+    socket.on("join-room", async ({ rideId, isMap })=>{
 
         console.log("Joining Room....");
 
@@ -61,14 +61,17 @@ io.on("connection", (socket)=>{
             return;
         }
 
-        socket.join(rideId);
+        const roomName = isMap ? `map-${rideId}` : rideId
 
-        console.log(`${socket.userId} joined room for ride id: ${rideId}`);
+        socket.join(roomName);
+
+        console.log(`${socket.userId} joined room ${rideId}`);
     });
 
-    socket.on("leave-room", async({ rideId })=>{
-        console.log("Leaving Room...");
-        socket.leave(rideId);
+    socket.on("leave-room", async({ rideId, isMap })=>{
+        console.log(isMap ? "Leaving Map Room..." : "Leaving Room...");
+        const roomName = isMap ? `map-${rideId}` : rideId
+        socket.leave(roomName);
         console.log(`${ socket.userId } left the room for ride id: ${ rideId }`)
     })
 })

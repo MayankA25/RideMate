@@ -115,6 +115,10 @@ passport.use(new Strategy(
         const email = profile.emails[0].value;
 
         const foundUser = await User.findOne({ email: email });
+
+        if(foundUser && foundUser.isBanned){
+            return done("Your account has been banned. Contact admin of this app.", null)
+        }
         
         if(foundUser){
             const userObj = { user: foundUser, accessToken: accessToken, refreshToken: refreshToken };
