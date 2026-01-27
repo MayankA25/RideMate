@@ -18,6 +18,8 @@ export const useMapStore = create((set, get)=>({
 
     isLiveTrackingEnabled: false,
 
+    liveCoords: null,
+
     setStartCoords: (coords)=>{
         console.log("Start Coords: ", coords);
         set({ startCoords: coords })
@@ -31,6 +33,10 @@ export const useMapStore = create((set, get)=>({
     setEndCoords: (coords)=>{
         console.log("End Coords: ", coords);
         set({ endCoords: coords });
+    },
+
+    setLiveCoords: (liveCoords)=>{
+        set({ liveCoords: liveCoords })
     },
 
     getRideCoordinates: async(rideId)=>{
@@ -84,11 +90,10 @@ export const useMapStore = create((set, get)=>({
     //     socket.emit("leave-room", { rideId: rideId, isMap: true })
     // },
 
-    shareLiveCoordinates: async(rideId, liveCoords)=>{
+    shareLiveCoordinates: async(liveCoords)=>{
         if(get().isUserPassenger) return;
         try{
             const response = await axiosInstance.post("/rides/sharelivelocation", {
-                rideId: rideId,
                 liveCoords: liveCoords
             });
             console.log("Response: ", response.data);

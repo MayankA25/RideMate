@@ -112,14 +112,14 @@ function Route({ waypoints, color = "red" }) {
 }
 
 export default function Map() {
-  const { coords, isGeolocationEnabled, isGeolocationAvailable } =
-    useGeolocated({
-      positionOptions: {
-        enableHighAccuracy: true,
-      },
-      watchPosition: true,
-      userDecisionTimeout: 5000,
-    });
+  // const { coords, isGeolocationEnabled, isGeolocationAvailable } =
+  //   useGeolocated({
+  //     positionOptions: {
+  //       enableHighAccuracy: true,
+  //     },
+  //     watchPosition: true,
+  //     userDecisionTimeout: 5000,
+  //   });
 
   const [userCoords, setUserCoords] = useState({
     lat: 0,
@@ -129,7 +129,7 @@ export default function Map() {
   // const start = [23.2599, 77.4126]; // Start
   // const [end, setEnd] = useState([28.6139, 77.209]);
 
-  const { startCoords, endCoords, getRideCoordinates, loadingMap, driverCoords, shareLiveCoordinates, subscribeToLiveLocation, unsubscribeToLiveLocation, isUserPassenger, leaveLiveLocationRoom, joinLiveLocationRoom, isUserDriver } = useMapStore();
+  const { startCoords, endCoords, getRideCoordinates, loadingMap, driverCoords, shareLiveCoordinates, subscribeToLiveLocation, unsubscribeToLiveLocation, isUserPassenger, leaveLiveLocationRoom, joinLiveLocationRoom, isUserDriver, liveCoords } = useMapStore();
   const { authenticated, socket } = useAuthStore();
 
 
@@ -201,10 +201,10 @@ export default function Map() {
     // joinLiveLocationRoom(params?.id);
     // });
 
-    return ()=>{
-      unsubscribeToLiveLocation();
-      leaveLiveLocationRoom(params?.id)
-    }
+    // return ()=>{
+    //   unsubscribeToLiveLocation();
+    //   leaveLiveLocationRoom(params?.id)
+    // }
   }, []);
 
   useEffect(()=>{
@@ -217,29 +217,29 @@ export default function Map() {
     }
   }, [socket])
   
-  useEffect(()=>{
+  // useEffect(()=>{
 
-    console.log("Is User Driver: ", isUserDriver)
+  //   console.log("Is User Driver: ", isUserDriver)
 
-    if(!isUserDriver){
-      console.log("User is not a driver to share location")
-      return;
-    }
+  //   if(!isUserDriver){
+  //     console.log("User is not a driver to share location")
+  //     return;
+  //   }
 
-    console.log("Coords: ", coords);
-    console.log("Is Geolocation Enabled", isGeolocationEnabled);
-    console.log("Is Geolocation Available", isGeolocationAvailable);
+  //   console.log("Coords: ", liveCoords);
+  //   // console.log("Is Geolocation Enabled", isGeolocationEnabled);
+  //   // console.log("Is Geolocation Available", isGeolocationAvailable);
 
-    if(!isGeolocationEnabled){
-      return toast.error("Location Not Enabled")
-    }
-    if(!isGeolocationAvailable){
-      return toast.error("Live Location Not Available")
-    }
-    if(authenticated && coords && isUserDriver){
-      shareLiveCoordinates(params.id, coords);
-    }
-  }, [coords, isUserDriver])
+  //   // if(!isGeolocationEnabled){
+  //   //   return toast.error("Location Not Enabled")
+  //   // }
+  //   // if(!isGeolocationAvailable){
+  //   //   return toast.error("Live Location Not Available")
+  //   // }
+  //   if(authenticated && liveCoords && isUserDriver){
+  //     shareLiveCoordinates(liveCoords);
+  //   }
+  // }, [liveCoords, isUserDriver])
 
   return (
     <>

@@ -857,32 +857,53 @@ export const removePassenger = async (req, res) => {
   }
 };
 
-export const shareLiveCoordinates = async (req, res) => {
-  const { rideId, liveCoords } = req.body;
-  try {
-    const foundRide = await Ride.findById(rideId).populate('driver').populate('passengers').populate('group');
+// export const shareLiveCoordinates = async (req, res) => {
+//   const { rideId, liveCoords } = req.body;
+//   try {
+//     const foundRide = await Ride.findById(rideId).populate('driver').populate('passengers').populate('group');
+//     const userId = req.session.passport.user.user._id;
+
+//     if(foundRide.driver._id != userId){
+//       return res.status(400).json({ msg: "Only Driver Is Allowed To Share Live Location" })
+//     }
+
+//     if(!foundRide.isLiveTrackingEnabled){
+//       return res.status(400).json({ msg: "Live Tracking of Ride has not been enabled by driver." })
+//     }
+
+//     console.log("Live Coords: ", liveCoords);
+
+//     io.to(`map-${rideId}`).emit("liveCoords", liveCoords);
+
+//     return res
+//       .status(200)
+//       .json({ msg: "Current Location Shared", liveCoords: liveCoords });
+//   } catch (e) {
+//     console.log(e);
+//     return res.status(500).json({ msg: "Internal Server Error" });
+//   }
+// };
+
+export const shareLiveCoordinates = async(req, res)=>{
+  const { liveCoords } = req.body;
+  try{
     const userId = req.session.passport.user.user._id;
+    const foundRides = await Ride.find({
+      driver: userId,
+      isLiveTrackingEnabled: true
+    }).populate('driver').populate('passengers').populate('group');
 
-    if(foundRide.driver._id != userId){
-      return res.status(400).json({ msg: "Only Driver Is Allowed To Share Live Location" })
-    }
+    foundRides.forEach((ride, index)=>{
+      io.to(`map-${ride._id}`).emit("liveCoords", liveCoords);
+    });
 
-    if(!foundRide.isLiveTrackingEnabled){
-      return res.status(400).json({ msg: "Live Tracking of Ride has not been enabled by driver." })
-    }
+    res.status(200).json({ msg: "Live Coords Shared", liveCoords: liveCoords });
 
-    console.log("Live Coords: ", liveCoords);
-
-    io.to(`map-${rideId}`).emit("liveCoords", liveCoords);
-
-    return res
-      .status(200)
-      .json({ msg: "Current Location Shared", liveCoords: liveCoords });
-  } catch (e) {
+  }catch(e){
     console.log(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: "Internal Server Error" })
   }
-};
+}
 
 export const toggleLIveTracking = async (req, res) => {
   const { rideId } = req.body;

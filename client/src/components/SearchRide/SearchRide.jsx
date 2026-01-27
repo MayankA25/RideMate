@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useRideStore } from "../../store/userRideStore";
 import { useNavigate } from "react-router-dom";
 import RideForm from "../RideForm/RideForm";
+import TrendingRides from "../TrendingRides/TrendingRides";
 
 export default function SearchRide() {
   const {
@@ -39,6 +40,7 @@ export default function SearchRide() {
   return (
     <div className="flex items-center w-[78%] m-auto">
       <RideForm type="search"/>
+      <TrendingRides/>
     </div>
   );
 }
