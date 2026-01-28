@@ -121,3 +121,30 @@ export const deleteRideAlert = async(req, res)=>{
         return res.status(500).json({ msg: "Internal Server Error" })
     }
 }
+
+
+export const getTrendingRides = async(req, res)=>{
+    try{
+        const trendingRides = await RideAlert.aggregate([{
+            $group: {
+                _id: {
+                    pickup: "$pickup",
+                    destination: "$destination",
+                    departureDate: "$departureDate"
+                },
+                alertCount: { $sum: 1 }
+            }
+        },
+        {
+            $sort: { alertCount: -1  }
+        }
+    ]);
+
+    console.log("Trending Rides: ", trendingRides);
+
+    return res.status(200).json({ trendingRideAlerts: trendingRides });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ msg: "Internal Server Error" })
+    }
+}

@@ -23,6 +23,8 @@ export const useRideAlertStore = create((set, get)=>({
         numberOfPassengers: 1
     },
 
+    trendingRides: [],
+
     creating: false,
 
     matchFound: false,
@@ -125,6 +127,21 @@ export const useRideAlertStore = create((set, get)=>({
         }catch(e){
             console.log(e);
             toast.error("Error While Deleting Ride Alert")
+        }finally{
+            set({ loading: false });
+        }
+    },
+
+
+    getTrendingRides: async()=>{
+        try{
+            set({ loading: true })
+            const response = await axiosInstance.get("/ridealerts/trendingrides");
+            console.log("Response: ", response.data);
+
+            set({ trendingRides: response.data.trendingRideAlerts })
+        }catch(e){
+            console.log(e);
         }finally{
             set({ loading: false });
         }

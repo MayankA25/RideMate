@@ -14,7 +14,7 @@ export const verifyToken = async(req, res, next)=>{
         const email = user?.email;
         const foundUser = await User.findOne({ email: email });
 
-        if(!foundUser) return res.status(401).json({ msg: "Unauthenticated" });
+        if(!foundUser || foundUser.isBanned) return res.status(401).json({ msg: "Unauthenticated" });
 
         return next();
 

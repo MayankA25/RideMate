@@ -197,6 +197,20 @@ export const addRide = async (req, res) => {
 
     console.log("User Email: ", userEmails);
 
+    await RideAlert.deleteMany(
+      {
+        "pickup.place_id": pickup.place_id,
+        "destination.place_id": destination.place_id,
+        departureDate: {
+          $gte: new Date(startDate),
+          $lt: new Date(endDate)
+        },
+        numberOfPassengers: {
+          $lte: availableSeats
+        }
+      }
+    )
+
     const senderMail = req.session.passport.user.user.email;
     const accessToken = req.session.passport.user.accessToken;
     const refreshToken = req.session.passport.user.refreshToken;

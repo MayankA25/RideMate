@@ -292,3 +292,26 @@ export const removeUser = async (req, res) => {
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
+
+
+
+export const unbanUser = async(req, res)=>{
+  const { userId } = req.body;
+  try{
+
+    const foundUser = await User.findById(userId);
+
+    if(!foundUser) return res.status(200).json({ msg: "User Not Found" })
+
+    const updatedUser = await User.findByIdAndUpdate(userId, {
+      isBanned: false
+    });
+
+    console.log("Updated User: ", updatedUser)
+
+    return res.status(200).json({ msg: "User is unbanned", updatedUser: updatedUser })
+  }catch(e){
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server Erro" })
+  }
+}

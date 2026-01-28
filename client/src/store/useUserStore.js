@@ -12,6 +12,11 @@ export const useUserStore = create((set, get)=>({
 
     loading: false,
 
+    banUser: false,
+
+    setBanUser: (val)=>{
+        set({ banUser: val })
+    },
     getAllUsers: async()=>{
         try{
             set({ loading: true });
@@ -117,7 +122,12 @@ export const useUserStore = create((set, get)=>({
                 return user._id == userId
             });
             console.log("Found Index: ", foundIndex);
-            allUsers.splice(foundIndex, 1);
+            if(!deletePermanently){
+                allUsers.splice(foundIndex, 1);
+            }
+            else{
+                allUsers[foundIndex].isBanned = true;
+            }
             set({ allUsers: allUsers })
         }catch(e){
             console.log(e);
@@ -127,5 +137,26 @@ export const useUserStore = create((set, get)=>({
         }
     },
 
+    unbanUser: async(userId)=>{
+        const allUsers = [...get().allUsers];
+        try{
+            set({ loading: true });
+            const response = await axiosInstance.put("/users/unbanuser", {
+                userId: userId
+            });
+            console.log("Response: ", response.data);
+
+            const foundIndex = allUsers.findIndex((user, index)=>user._id == userId);
+
+            allUsers[foundIndex].isBanned = false;
+
+            set({ allUsers: allUsers });
+        }catch(e){
+            console.log(e);
+            return toast.error("Error While UnBanning User")
+        }finally{
+            set({ loading: false });
+        }
+    }
 
 }))

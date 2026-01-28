@@ -8,6 +8,7 @@ import BanUserConfirmation from "../BanUserConfirmation/BanUserConfirmation";
 
 export default function UserItem({ specificUser, index }) {
   const navigate = useNavigate();
+  const { setBanUser } = useUserStore();
   return (
     <div className="flex flex-col justify-center bg-base-300 py-5 px-4 gap-4 rounded-xl">
       <UserDocumentOpenModal
@@ -60,28 +61,30 @@ export default function UserItem({ specificUser, index }) {
       </div>
       <div
         className={`grid ${
-          (specificUser.aadharCardStatus == "under review" ||
+          !specificUser.isBanned && (specificUser.aadharCardStatus == "under review" ||
             specificUser.aadharCardStatus == "verified" ||
             specificUser.drivingLicense == "under review" ||
             specificUser.drivingLicenseStatus == "verified") &&
           "grid-cols-4"
         } ${
-          (specificUser.aadharCardStatus == "under review" ||
+          (!specificUser.isBanned &&(specificUser.aadharCardStatus == "under review" ||
             specificUser.aadharCardStatus == "verified") &&
           (specificUser.drivingLicenseStatus == "under review" ||
-            specificUser.drivingLicenseStatus == "verified") &&
+            specificUser.drivingLicenseStatus == "verified")) &&
           "grid-cols-5"
         } ${
-          !(
+          (!specificUser.isBanned && !(
             specificUser.aadharCardStatus == "under review" ||
             specificUser.aadharCardStatus == "verified"
           ) &&
           !(
             specificUser.drivingLicenseStatus == "under review" ||
             specificUser.drivingLicenseStatus == "verified"
-          ) &&
+          )) &&
           "grid-cols-3"
-        } gap-3`}
+        } 
+        
+        gap-3`}
       >
         {(specificUser.aadharCardStatus == "under review" ||
           specificUser.aadharCardStatus == "verified") && (
@@ -102,16 +105,19 @@ export default function UserItem({ specificUser, index }) {
             document.getElementById(`my_user_open_doc_modal_${index}_2`).showModal()
           }}>Driving License</button>
         )}
-        <button className="btn btn-primary font-bold" onClick={()=>{
+        {!specificUser.isBanned && <button className="btn btn-primary font-bold" onClick={()=>{
           navigate(`/dashboard/users/rides/${specificUser._id}`)
-        }}>Show Rides</button>
-        <button className="btn btn-error text-white font-bold" onClick={()=>{
+        }}>Show Rides</button>}
+        {!specificUser.isBanned && <button className="btn btn-error text-white font-bold" onClick={()=>{
           // removeUser(specificUser._id);
           document.getElementById(`my_remove_user_modal_${index}`).showModal();
-        }}>Remove</button>
-        <button className="btn btn-error text-white font-bold" onClick={()=>{
+        }}>Remove</button>}
+        {!specificUser.isBanned && <button className="btn btn-error text-white font-bold" onMouseOver={()=>{ setBanUser(true) }} onClick={()=>{
           document.getElementById(`my_ban_user_modal_${index}`).showModal()
-        }}>Ban Permanently</button>
+        }}>Ban Permanently</button>}
+        {specificUser.isBanned && <button className="text-white btn btn-error" onMouseOver={()=>{ setBanUser(false) }} onClick={()=>{
+          document.getElementById(`my_ban_user_modal_${index}`).showModal()
+        }} >UnBan User</button>}
       </div>
     </div>
   );
