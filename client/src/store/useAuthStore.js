@@ -24,6 +24,8 @@ export const useAuthStore = create((set, get)=>({
 
     isUserAuthenticatedAccount: true,
 
+    loading: false,
+
     getUser: async()=>{
         try{
             set({ checking: true })
@@ -35,10 +37,10 @@ export const useAuthStore = create((set, get)=>({
             set({ authenticated: true, user: response.data.user });
         }catch(e){
             console.log(e);
-            set({ authenticated: false, user: null });
+            set({ authenticated: false, user: null, loading: true });
         }
         finally{
-            set({ checking: false })
+            set({ checking: false });
         }
     },
 

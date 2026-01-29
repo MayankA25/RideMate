@@ -16,7 +16,7 @@ export default function Account() {
   const params = useParams();
 
   const ref = useRef(null);
-  const { user, updateProfilePicture, getUserById, specificUser, isUserAuthenticatedAccount } = useAuthStore();
+  const { user, updateProfilePicture, getUserById, specificUser, isUserAuthenticatedAccount, loading } = useAuthStore();
   const navigate = useNavigate();
 
   const [ userProfile, setUserProfile ] = useState(user?.profilePic);
@@ -52,7 +52,7 @@ export default function Account() {
 
   useEffect(()=>{
     console.log("Params: ", params);
-    getUserById(params.id)
+    // getUserById(params.id)
   }, []);
 
   useEffect(()=>{
@@ -86,13 +86,13 @@ export default function Account() {
             <Edit2 className="size-5" /> Edit
           </button>}
         </div>
-        <hr className="text-white/30" />
+        <hr className={`text-white/30 ${loading && "opacity-0"}`} />
         <div className="flex items-center">
           <div className={`flex items-center gap-5 w-full ${user && params.id == user._id && "border-r border-white/30"}`}>
             <div className="flex items-center justify-center h-55 w-55 relative">
               <img
                 src={user && params.id == user?._id ? (userProfile || user?.profilePic) : specificUser?.profilePic}
-                className="w-full h-full rounded-full object-contain bg-base-300"
+                className={`w-full h-full rounded-full object-contain bg-base-300 ${loading && "skeleton"}`}
               />
               {user && params.id == user._id && <div
                 className="flex items-center justify-center w-full h-full absolute top-0 bg-white/10 rounded-full backdrop-blur-lg opacity-0 hover:opacity-100 transition-all duration-200 cursor-pointer"
@@ -169,32 +169,32 @@ export default function Account() {
             </div>
           </div>}
         </div>
-        <hr className="text-white/30" />
+        <hr className={`text-white/30 ${loading && "opacity-0"}`}/>
         <div className="flex flex-col justify-center gap-8">
           <div className="flex items-center justify-between">
-            <h1 className="font-bold text-4xl">{user && params.id == user._id ? "Personal Information" : "User Information"}</h1>
+            <h1 className={`font-bold text-4xl ${loading && "skeleton text-transparent"}`}>{user && params.id == user._id ? "Personal Information" : "User Information"}</h1>
           </div>
           <div className="grid grid-cols-2 gap-5">
-            <h1 className="font-bold text-lg">Name</h1>
-            <h1 className="font-bold text-lg">
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>Name</h1>
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>
               {user && params.id == user._id ? user?.firstName : specificUser?.firstName} {user && params.id == user._id ? user?.lastName : specificUser?.lastName}
             </h1>
-            <h1 className="font-bold text-lg">Email</h1>
-            <h1 className="font-bold text-lg">{user && params.id == user._id ? user?.email : specificUser?.email}</h1>
-            <h1 className="font-bold text-lg">Phone</h1>
-            <h1 className="font-bold text-lg">{user && params.id == user._id ? user?.phone : specificUser?.phone}</h1>
-            <h1 className="font-bold text-lg">Location</h1>
-            <h1 className="font-bold text-lg">
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>Email</h1>
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>{user && params.id == user._id ? user?.email : specificUser?.email}</h1>
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>Phone</h1>
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>{user && params.id == user._id ? user?.phone : specificUser?.phone}</h1>
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>Location</h1>
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>
               {user && params.id == user._id ? user?.state : specificUser?.state}, {user && params.id == user._id ? user?.country : specificUser?.country}
             </h1>
-            <h1 className="font-bold text-lg">Gender</h1>
-            <h1 className="font-bold text-lg">{ user && params.id == user._id ? user?.gender : specificUser?.gender }</h1>
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>Gender</h1>
+            <h1 className={`font-bold text-lg ${loading && "skeleton text-transparent"}`}>{ user && params.id == user._id ? user?.gender : specificUser?.gender }</h1>
           </div>
         </div>
-        <hr className="text-white/30" />
+        {<hr className={`text-white/30 ${loading && "opacity-0"}`} />}
         {user && <div className="flex items-center">
           <SubmitReportModal />
-          <div className="flex items-center gap-2 text-indigo-300">
+          <div className={`flex items-center gap-2 text-indigo-300 ${loading && "skeleton text-transparent"}`}>
             <TriangleAlert className="cursor-pointer" onClick={()=>{
               document.getElementById('my_report_submission_modal').showModal()
             }}/>
