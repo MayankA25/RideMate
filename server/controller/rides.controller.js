@@ -197,7 +197,7 @@ export const addRide = async (req, res) => {
 
     console.log("User Email: ", userEmails);
 
-    await RideAlert.deleteMany(
+    await RideAlert.deleteOne(
       {
         "pickup.place_id": pickup.place_id,
         "destination.place_id": destination.place_id,

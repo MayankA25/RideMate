@@ -1,4 +1,4 @@
-import { ArrowLeft, BadgeCheck, Edit2, Pen, ShieldCheck } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Edit2, Pen, ShieldCheck, TriangleAlert } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNavigate, useParams } from "react-router-dom";
@@ -8,16 +8,20 @@ import { uploadFile } from "../../../utils/upload";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
 import { axiosInstance } from "../../lib/axios";
+import SubmitReportModal from "../SubmitReportModal/SubmitReportModal";
+import useReportStore from "../../store/useReportStore";
 
 export default function Account() {
 
   const params = useParams();
 
   const ref = useRef(null);
-  const { user, updateProfilePicture, getUserById, specificUser } = useAuthStore();
+  const { user, updateProfilePicture, getUserById, specificUser, isUserAuthenticatedAccount } = useAuthStore();
   const navigate = useNavigate();
 
   const [ userProfile, setUserProfile ] = useState(user?.profilePic);
+
+  const { setReportDetails } = useReportStore();
 
   const handleProfileUpload = async (e) => {
     const file = e.target.files[0];
@@ -49,7 +53,13 @@ export default function Account() {
   useEffect(()=>{
     console.log("Params: ", params);
     getUserById(params.id)
-  }, [])
+  }, []);
+
+  useEffect(()=>{
+    if(!isUserAuthenticatedAccount){
+      navigate("/")
+    }
+  }, [isUserAuthenticatedAccount])
 
   return (
     <div className="w-[65%] m-auto h-full py-8">
@@ -182,6 +192,17 @@ export default function Account() {
           </div>
         </div>
         <hr className="text-white/30" />
+        {user && <div className="flex items-center">
+          <SubmitReportModal />
+          <div className="flex items-center gap-2 text-indigo-300">
+            <TriangleAlert className="cursor-pointer" onClick={()=>{
+              document.getElementById('my_report_submission_modal').showModal()
+            }}/>
+            <span className="font-bold cursor-pointer" onClick={()=>{
+              document.getElementById('my_report_submission_modal').showModal()
+            }}>Report User</span>
+          </div>
+        </div>}
         {/* <div className="flex flex-col justify-center gap-8 w-full">
           <h1 className="font-bold text-3xl">Verified Documents</h1>
           <div className="flex items-center">

@@ -22,6 +22,8 @@ export const useAuthStore = create((set, get)=>({
 
     checking: false,
 
+    isUserAuthenticatedAccount: true,
+
     getUser: async()=>{
         try{
             set({ checking: true })
@@ -158,6 +160,8 @@ export const useAuthStore = create((set, get)=>({
             set({ specificUser: response.data.user })
         }catch(e){
             console.log(e);
+            set({ isUserAuthenticatedAccount: false });
+            toast.error(e.response.data.msg)
         }
     }
 }))

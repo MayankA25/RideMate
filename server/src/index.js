@@ -16,6 +16,7 @@ import chatRouter from "../routes/chat.route.js";
 import groupRouter from "../routes/group.route.js";
 import userRouter from "../routes/user.route.js";
 import rideAlertRouter from "../routes/ridealert.route.js";
+import reportRouter from "../routes/reports.route.js";
 
 dotenv.config({ path: "D:\\Mayank Data\\CODING\\RideMate\\server\\.env" })
 
@@ -65,6 +66,7 @@ app.use("/api/group", groupRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/users", userRouter);
 app.use("/api/ridealerts", rideAlertRouter);
+app.use("/api/reports", reportRouter);
 
 const PORT = process.env.PORT;
 server.listen(PORT, ()=>{

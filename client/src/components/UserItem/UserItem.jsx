@@ -65,13 +65,13 @@ export default function UserItem({ specificUser, index }) {
             specificUser.aadharCardStatus == "verified" ||
             specificUser.drivingLicense == "under review" ||
             specificUser.drivingLicenseStatus == "verified") &&
-          "grid-cols-4"
+          "grid-cols-5"
         } ${
           (!specificUser.isBanned &&(specificUser.aadharCardStatus == "under review" ||
             specificUser.aadharCardStatus == "verified") &&
           (specificUser.drivingLicenseStatus == "under review" ||
             specificUser.drivingLicenseStatus == "verified")) &&
-          "grid-cols-5"
+          "grid-cols-6"
         } ${
           (!specificUser.isBanned && !(
             specificUser.aadharCardStatus == "under review" ||
@@ -81,7 +81,7 @@ export default function UserItem({ specificUser, index }) {
             specificUser.drivingLicenseStatus == "under review" ||
             specificUser.drivingLicenseStatus == "verified"
           )) &&
-          "grid-cols-3"
+          "grid-cols-4"
         } 
         
         gap-3`}
@@ -115,6 +115,9 @@ export default function UserItem({ specificUser, index }) {
         {!specificUser.isBanned && <button className="btn btn-error text-white font-bold" onMouseOver={()=>{ setBanUser(true) }} onClick={()=>{
           document.getElementById(`my_ban_user_modal_${index}`).showModal()
         }}>Ban Permanently</button>}
+        {!specificUser.isBanned && <button className="btn btn-error text-white font-bold" onClick={()=>{
+          navigate(`/dashboard/users/reports/${specificUser._id}`)
+        }} >View Reports</button>}
         {specificUser.isBanned && <button className="text-white btn btn-error" onMouseOver={()=>{ setBanUser(false) }} onClick={()=>{
           document.getElementById(`my_ban_user_modal_${index}`).showModal()
         }} >UnBan User</button>}
