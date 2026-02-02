@@ -243,6 +243,7 @@ export const useRideStore = create((set, get) => ({
       toast.success("Ride Cacelled Succesfully");
     } catch (e) {
       console.log(e);
+      toast.error(e.response.data.msg);
     } finally {
       set({ cancelling: false });
     }

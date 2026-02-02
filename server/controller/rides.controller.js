@@ -522,6 +522,25 @@ export const cancelRide = async (req, res) => {
   const { rideId } = await req.body;
   try {
     const userId = req.session.passport.user.user._id;
+    const foundRide = await Ride.findById(rideId);
+
+    console.log("Found Ride: ", foundRide);
+
+    const passengersJoinedAtArray = foundRide.passengersJoinedAt;
+
+    console.log("Passengers Joined At: ", passengersJoinedAtArray);
+
+    const userRideJoiningDateTime = passengersJoinedAtArray.get(`${userId}`);
+
+    console.log("User Joined Ride at: ", new Date(userRideJoiningDateTime).toDateString(), new Date(userRideJoiningDateTime).toTimeString());
+
+    console.log("Current Time: ", new Date().getTime());
+    console.log("User Joining Date Time: ", new Date(userRideJoiningDateTime).getTime());
+
+    if(new Date().getTime() <= (new Date(userRideJoiningDateTime).getTime() + (24*60*60*1000))){
+      return res.status(400).json({ msg: "Cannot Cancel Ride Before 24hrs of joining ride." });
+    }
+
     const updatedRide = await Ride.findByIdAndUpdate(
       rideId,
       {

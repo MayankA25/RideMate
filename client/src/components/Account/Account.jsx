@@ -52,7 +52,7 @@ export default function Account() {
 
   useEffect(()=>{
     console.log("Params: ", params);
-    // getUserById(params.id)
+    getUserById(params.id)
   }, []);
 
   useEffect(()=>{
